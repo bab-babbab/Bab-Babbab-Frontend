@@ -1,0 +1,37 @@
+{
+  "project_info": {
+    "project_number": "170589663294",
+    "project_id": "bab-babbab",
+    "storage_bucket": "bab-babbab.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:170589663294:android:ad5f71e4154df436ab616f",
+        "android_client_info": {
+          "package_name": "com.example.bab_babbab_front"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDFfyWkHmT08CSZwAjBgjmc4IrsPJK8QvE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "170589663294-p24qcr9c62k7l7fe59ntt3tlhq3gblok.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.babBabbabFront"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
