@@ -5,12 +5,14 @@ import 'package:firebase_core/firebase_core.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+   if (Firebase.apps.isEmpty) {
+      await Firebase.initializeApp(
+        name: 'bab-babbab',
+        options: DefaultFirebaseOptions.currentPlatform,
+      );
+    }
   runApp(MainApp());
 }
-
 
 class MainApp extends StatelessWidget {
   const MainApp({super.key});

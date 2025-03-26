@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:bab_babbab_front/service/firebase_auth.dart';
+import 'package:bab_babbab_front/screens/main/InfoPage.dart';
 
 class SelectPage extends StatelessWidget {
 
@@ -26,6 +27,10 @@ final AuthService _authService = AuthService();
                 final result = await _authService.signInWithGoogle();
                 if (result != null) {
                   print('로그인 완료: ${result.user?.email}');
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => InformationPage()),
+                  );
                 } else {
                   print('로그인 실패 또는 취소됨');
                 }
