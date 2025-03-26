@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:dropdown_button2/dropdown_button2.dart';
+import 'package:bab_babbab_front/screens/home/home.dart';
 
 class InformationPage extends StatefulWidget {
   const InformationPage({super.key});
@@ -156,7 +157,11 @@ class _InformationPageState extends State<InformationPage> {
                   color: Color(0xffFFFFFF)
                 ),
               ),
-              onPressed:() => InformationPage(),
+              onPressed:() {
+                Navigator.push(context, 
+                MaterialPageRoute(builder: (context) => HomePage()),
+                );
+              },
             ),
           ],
         ),
