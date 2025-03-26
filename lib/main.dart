@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/screens/main/selectPage.dart';
 import 'package:bab_babbab_front/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:bab_babbab_front/screens/home/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -28,7 +27,7 @@ class MainApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       title: 'bab-babbab',
-      home: HomePage(),
+      home: SelectPage(),
     );
   }
 }
