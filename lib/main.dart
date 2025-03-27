@@ -20,6 +20,11 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      theme: ThemeData(
+        splashFactory: NoSplash.splashFactory, 
+        highlightColor: Colors.transparent,
+        splashColor: Colors.transparent,
+      ),
       debugShowCheckedModeBanner: false,
       title: 'bab-babbab',
       home: SelectPage(),
