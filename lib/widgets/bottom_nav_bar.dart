@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import '../screens/posts/posts_page.dart';
 
 class CustomBottomNav extends StatelessWidget {
   final int currentIndex;
@@ -15,17 +16,19 @@ class CustomBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     return BottomNavigationBar(
       backgroundColor: Color(0xffFFFFFF),
-      type: BottomNavigationBarType.fixed, 
-      currentIndex: currentIndex, 
-      onTap: onTap,  
+      type: BottomNavigationBarType.fixed,
+      currentIndex: currentIndex,
+      onTap: onTap,
       selectedLabelStyle: const TextStyle(
         fontSize: 12,
-        fontFamily: 'Pretendard'), 
+        fontFamily: 'Pretendard',
+      ),
       unselectedLabelStyle: const TextStyle(
         fontSize: 12,
-        fontFamily: 'Pretendard'),  
-      selectedItemColor: Color(0xffFFAD0A), 
-      unselectedItemColor: Color(0xffD1D2D1), 
+        fontFamily: 'Pretendard',
+      ),
+      selectedItemColor: Color(0xffFFAD0A),
+      unselectedItemColor: Color(0xffD1D2D1),
 
       items: [
         BottomNavigationBarItem(
@@ -35,8 +38,8 @@ class CustomBottomNav extends StatelessWidget {
               currentIndex == 0 ? Color(0xffFFAD0A) : Color(0xffD1D2D1),
               BlendMode.srcIn,
             ),
-            width: 24,  
-            height: 24, 
+            width: 24,
+            height: 24,
           ),
           label: '홈',
         ),
@@ -44,11 +47,11 @@ class CustomBottomNav extends StatelessWidget {
           icon: SvgPicture.asset(
             'assets/icon/badge.svg',
             colorFilter: ColorFilter.mode(
-              currentIndex == 1 ? Color(0xffFFAD0A) : Color(0xffD1D2D1), 
+              currentIndex == 1 ? Color(0xffFFAD0A) : Color(0xffD1D2D1),
               BlendMode.srcIn,
             ),
-            width: 24,  
-            height: 24, 
+            width: 24,
+            height: 24,
           ),
           label: '게시물',
         ),
@@ -56,10 +59,10 @@ class CustomBottomNav extends StatelessWidget {
           icon: SvgPicture.asset(
             'assets/icon/ranking.svg',
             colorFilter: ColorFilter.mode(
-              currentIndex == 2 ? Color(0xffFFAD0A) : Color(0xffD1D2D1), 
+              currentIndex == 2 ? Color(0xffFFAD0A) : Color(0xffD1D2D1),
               BlendMode.srcIn,
             ),
-            width: 24,  
+            width: 24,
             height: 24,
           ),
           label: '랭킹',
@@ -68,11 +71,11 @@ class CustomBottomNav extends StatelessWidget {
           icon: SvgPicture.asset(
             'assets/icon/profile.svg',
             colorFilter: ColorFilter.mode(
-              currentIndex == 3 ? Color(0xffFFAD0A) : Color(0xffD1D2D1), 
+              currentIndex == 3 ? Color(0xffFFAD0A) : Color(0xffD1D2D1),
               BlendMode.srcIn,
             ),
-            width: 24, 
-            height: 24, 
+            width: 24,
+            height: 24,
           ),
           label: '마이페이지',
         ),
