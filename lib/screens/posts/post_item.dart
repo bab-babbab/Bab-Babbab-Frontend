@@ -41,7 +41,13 @@ class PostItem extends StatelessWidget {
           SizedBox(height: 22),
 
           Row(
-            children: [ImageBox(), ImageBox(), ImageBox(showPlusButton: true)],
+            children: [
+              ImageBox(),
+              SizedBox(width: 8),
+              ImageBox(),
+              SizedBox(width: 8),
+              ImageBox(showPlusButton: true),
+            ],
           ),
         ],
       ),
