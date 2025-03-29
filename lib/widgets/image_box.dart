@@ -16,6 +16,7 @@ class ImageBox extends StatelessWidget {
           borderType: BorderType.RRect,
           radius: Radius.circular(8),
           child: Container(
+            padding: EdgeInsets.all(16),
             width: 88,
             height: 66,
             color: Colors.orange.withOpacity(0.1),
