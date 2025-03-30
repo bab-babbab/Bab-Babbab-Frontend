@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:bab_babbab_front/widgets/bottom_nav_bar.dart';
 import 'post_item.dart';
 
 class PostsPage extends StatelessWidget {
@@ -21,13 +22,16 @@ class PostsPage extends StatelessWidget {
         ),
       ),
       body: Container(
-        color: Color(0xFFF7F8F9), // 원하는 배경색 설정
-        child: ListView.builder(
-          padding: EdgeInsets.all(16),
-          itemCount: 3,
-          itemBuilder: (context, index) {
-            return PostItem();
-          },
+        color: Color(0xFFF7F8F9), // 배경색 설정
+        child: Padding(
+          padding: EdgeInsets.only(top: 20), // 원하는 간격 추가 (50px 예시)
+          child: ListView.builder(
+            padding: EdgeInsets.all(20),
+            itemCount: 4,
+            itemBuilder: (context, index) {
+              return PostItem();
+            },
+          ),
         ),
       ),
     );
