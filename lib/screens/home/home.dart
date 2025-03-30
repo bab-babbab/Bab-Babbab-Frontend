@@ -16,7 +16,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _pages = [
     _HomeMainContent(),
-    PostsPage(),
+    Center(child: Text('게시물')),
     RankingPage(),
     Center(child: Text('내 정보 페이지')),
   ];
