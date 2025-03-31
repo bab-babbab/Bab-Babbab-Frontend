@@ -8,16 +8,23 @@ class PostsPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
         title: Text(
           "전체 보기",
-          style: TextStyle(color: Colors.black, fontSize: 19),
+          style: TextStyle(
+            color: Color(0xFF575757),
+            fontSize: 19,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         backgroundColor: Colors.white,
+        scrolledUnderElevation: 0,
         elevation: 0,
         centerTitle: true,
+        shape: Border(bottom: BorderSide(color: Color(0xFFD7D7D7), width: 1)),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.chevron_left, color: Color(0xFFD1D2D1), size: 35),
           onPressed: () => Navigator.pop(context),
         ),
       ),
