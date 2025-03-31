@@ -1,7 +1,20 @@
 import 'package:flutter/material.dart';
 
-class PostDetailPage extends StatelessWidget {
+class PostDetailPage extends StatefulWidget {
   const PostDetailPage({super.key});
+
+  @override
+  _PostDetailPageState createState() => _PostDetailPageState();
+}
+
+class _PostDetailPageState extends State<PostDetailPage> {
+  final TextEditingController _commentController = TextEditingController();
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -186,29 +199,64 @@ class PostDetailPage extends StatelessWidget {
         ),
       ),
       bottomNavigationBar: Container(
-        padding: const EdgeInsets.all(16),
-        color: Colors.white,
+        width: double.infinity,
+        height: 70,
+        padding: const EdgeInsets.symmetric(vertical: 17), // 위아래 여백
+        decoration: ShapeDecoration(
+          color: Colors.white,
+          shape: RoundedRectangleBorder(
+            side: BorderSide(width: 2, color: Color(0xFFF2F2F2)),
+          ),
+        ),
         child: Row(
+          mainAxisAlignment: MainAxisAlignment.center, // 수평 중앙 정렬
           children: [
-            Expanded(
+            Icon(
+              Icons.account_circle, // 프로필 아이콘 적용
+              size: 28,
+              color: Colors.grey,
+            ),
+            SizedBox(width: 14), // 아이콘과 텍스트 사이 간격
+            Container(
+              width: 200, // 텍스트 필드 크기 제한
               child: TextField(
+                controller: _commentController,
                 decoration: InputDecoration(
                   hintText: "댓글 작성하기",
                   filled: true,
-                  fillColor: Colors.grey[200],
+                  fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                     borderSide: BorderSide.none,
                   ),
+                  contentPadding: const EdgeInsets.symmetric(
+                    vertical: 5, // 힌트가 잘 보이도록 내부 패딩 조정
+                  ),
                 ),
               ),
             ),
-            const SizedBox(width: 10),
-            IconButton(
-              icon: const Icon(Icons.send, color: Colors.black),
-              onPressed: () {
-                // 댓글 전송 기능 추가 필요
-              },
+
+            SizedBox(width: 55), // 텍스트 필드와 전송 아이콘 사이 간격
+
+            Transform.translate(
+              offset: const Offset(0, -5ㅇ), // X축(-10), Y축(-5) 방향으로 이동 (음수 적용)
+              child: IconButton(
+                icon: Transform.rotate(
+                  angle: -40 * (3.141592 / 180), // 반시계 방향 40도 회전
+                  child: Icon(
+                    Icons.send,
+                    color: Color(0xFFFFAD0A),
+                    size: 26,
+                  ), // 크기 조정 가능
+                ),
+                onPressed: () {
+                  String comment = _commentController.text.trim();
+                  if (comment.isNotEmpty) {
+                    print("$comment");
+                    _commentController.clear();
+                  }
+                },
+              ),
             ),
           ],
         ),
