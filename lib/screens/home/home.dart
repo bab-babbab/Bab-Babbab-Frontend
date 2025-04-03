@@ -1,7 +1,7 @@
-// home.dart
 import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/widgets/bottom_nav_bar.dart'; 
 import 'package:bab_babbab_front/screens/ranking/ranking.dart'; 
+import 'package:bab_babbab_front/screens/home/foodBoardPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -87,7 +87,9 @@ class _HomeMainContent extends StatelessWidget {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
                       onTap: (){
-
+                        Navigator.push(context, 
+                          MaterialPageRoute(builder: (context) => FoodBoardPage()),
+                        );
                       },
                       child: Container(
                         width: containerWidth / 2 - 7,
