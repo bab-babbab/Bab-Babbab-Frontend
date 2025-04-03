@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/screens/main/selectPage.dart';
 import 'package:bab_babbab_front/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:bab_babbab_front/screens/home/home.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,14 +21,15 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        splashFactory: NoSplash.splashFactory, 
-        highlightColor: Colors.transparent,
-        splashColor: Colors.transparent,
-      ),
+      // theme: ThemeData(
+      //   splashFactory: NoSplash.splashFactory, 
+      //   highlightColor: Colors.transparent,
+      //   splashColor: Colors.transparent,
+      // ),
       debugShowCheckedModeBanner: false,
       title: 'bab-babbab',
-      home: SelectPage(),
+      // home: SelectPage(),
+      home: HomePage(),
     );
   }
 }

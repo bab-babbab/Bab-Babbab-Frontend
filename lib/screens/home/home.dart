@@ -81,24 +81,56 @@ class _HomeMainContent extends StatelessWidget {
               SizedBox(width: 14),
               Column(
                 children: [
-                  Container(
-                    width: containerWidth / 2 - 7, 
-                    height: 96,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(16),
+                  Material(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: (){
+
+                      },
+                      child: Container(
+                        width: containerWidth / 2 - 7,
+                        height: 96,
+                        padding: EdgeInsets.only(top: 17,left: 30,bottom: 17),
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          children: [
+                            Text(
+                              "우리 학교\n급식",
+                              style: TextStyle(
+                                fontFamily: 'Pretendard',
+                                fontSize: 14,
+                                color: Color(0xff898A8D),
+                              ),
+                            ),
+                            SizedBox(width: 18),
+                            Padding(
+                              padding: EdgeInsets.only(top: 20),
+                              child: Image.asset(
+                                'assets/icon/foodBoard.png',
+                                width: 32,
+                                height: 32,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
                   SizedBox(height: 15),
-                  Container(
-                    width: containerWidth / 2 - 7, 
-                    height: 96,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.all(
-                        Radius.circular(16),
+                  Material(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(16),
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16),
+                      onTap: (){
+                        
+                      },
+                      child: Container(
+                        width: containerWidth / 2 - 7,
+                        height: 96,
+                        alignment: Alignment.center,
                       ),
                     ),
                   ),
