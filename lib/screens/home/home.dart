@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/widgets/bottom_nav_bar.dart'; 
 import 'package:bab_babbab_front/screens/ranking/ranking.dart'; 
 import 'package:bab_babbab_front/screens/home/foodBoardPage.dart';
+import 'package:bab_babbab_front/screens/posts/postsPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -15,7 +16,7 @@ class _HomePageState extends State<HomePage> {
 
   final List<Widget> _pages = [
     _HomeMainContent(), 
-    Center(child: Text('게시물 페이지')),
+    PostsPage(),
     RankingPage(),
     Center(child: Text('내 정보 페이지')),
   ];
@@ -132,7 +133,29 @@ class _HomeMainContent extends StatelessWidget {
                       child: Container(
                         width: containerWidth / 2 - 7,
                         height: 96,
-                        alignment: Alignment.center,
+                        padding: EdgeInsets.only(top: 17,left: 30,bottom: 17),
+                        alignment: Alignment.centerLeft,
+                        child: Row(
+                          children: [
+                            Text(
+                              "우리 학교\n랭킹",
+                              style: TextStyle(
+                                fontFamily: 'Pretendard',
+                                fontSize: 14,
+                                color: Color(0xff898A8D),
+                              ),
+                            ),
+                            SizedBox(width: 18),
+                            Padding(
+                              padding: EdgeInsets.only(top: 20),
+                              child: Image.asset(
+                                'assets/icon/ranking.png',
+                                width: 32,
+                                height: 32,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
