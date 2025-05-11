@@ -1,11 +1,9 @@
 import 'dart:io';
 
+import 'package:bab_babbab_front/screens/main/InfoStuPage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-
-import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:bab_babbab_front/screens/home/home.dart';
 
 class InformationPage extends StatefulWidget {
   const InformationPage({Key? key}) : super(key: key);
@@ -17,11 +15,6 @@ class InformationPage extends StatefulWidget {
 class _InformationPageState extends State<InformationPage> {
   final picker = ImagePicker();
   XFile? _pickedFile; // 카메라로 촬영한 이미지를 저장할 변수
-
-  List<String> gradeList = ['1학년', '2학년', '3학년'];
-  List<String> classList = ['1반', '2반', '3반', '4반', '5반', '6반'];
-  String? dropdownValue = '1학년';
-  String? classdropdown = '1반';
 
   @override
   Widget build(BuildContext context) {
@@ -36,102 +29,13 @@ class _InformationPageState extends State<InformationPage> {
             const SizedBox(height: 100),
             const Text(
               "반가워요! \n정보를 작성해주세요.",
-              style: TextStyle(fontFamily: 'Pretendard', fontSize: 24),
+              style: TextStyle(
+                fontFamily: 'Pretendard',
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+              ),
             ),
-            const SizedBox(height: 40),
-            Row(
-              children: [
-                DropdownButton2(
-                  value: dropdownValue,
-                  underline: const SizedBox(),
-                  isExpanded: true,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      dropdownValue = newValue!;
-                    });
-                  },
-                  items:
-                      gradeList.map((item) {
-                        return DropdownMenuItem<String>(
-                          value: item,
-                          child: Center(
-                            child: Text(
-                              item,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontFamily: 'Pretendard',
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                  buttonStyleData: ButtonStyleData(
-                    height: 60,
-                    width: 134,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: const Color(0xffF8F8F8),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                  ),
-                  dropdownStyleData: DropdownStyleData(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: Colors.white,
-                    ),
-                    elevation: 2,
-                  ),
-                  iconStyleData: const IconStyleData(
-                    icon: Icon(Icons.arrow_drop_down),
-                  ),
-                ),
-                SizedBox(width: 15),
-                DropdownButton2(
-                  value: classdropdown,
-                  underline: const SizedBox(),
-                  isExpanded: true,
-                  onChanged: (String? newValue) {
-                    setState(() {
-                      classdropdown = newValue!;
-                    });
-                  },
-                  items:
-                      classList.map((item) {
-                        return DropdownMenuItem<String>(
-                          value: item,
-                          child: Center(
-                            child: Text(
-                              item,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontFamily: 'Pretendard',
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                  buttonStyleData: ButtonStyleData(
-                    height: 60,
-                    width: 134,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: const Color(0xffF8F8F8),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                  ),
-                  dropdownStyleData: DropdownStyleData(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: Colors.white,
-                    ),
-                    elevation: 2,
-                  ),
-                  iconStyleData: const IconStyleData(
-                    icon: Icon(Icons.arrow_drop_down),
-                  ),
-                ),
-              ],
-            ),
+
             SizedBox(height: 30),
             TextField(
               decoration: InputDecoration(
@@ -233,7 +137,7 @@ class _InformationPageState extends State<InformationPage> {
                   ),
               ],
             ),
-            SizedBox(height: 100),
+            SizedBox(height: 210),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(336, 60),
@@ -253,7 +157,7 @@ class _InformationPageState extends State<InformationPage> {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => HomePage()),
+                  MaterialPageRoute(builder: (context) => InformationStuPage()),
                 );
               },
             ),
