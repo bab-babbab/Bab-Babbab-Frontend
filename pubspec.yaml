@@ -17,6 +17,7 @@ dependencies:
   firebase_auth: ^4.17.5
   dropdown_button2: ^2.3.9 
   image_picker: ^0.8.7
+  intl: ^0.18.1
   cupertino_icons: ^1.0.8
 
 dev_dependencies:
@@ -38,3 +39,4 @@ flutter:
     - assets/logo/
     - assets/fonts/
     - assets/icon/
+    - assets/config/.env
