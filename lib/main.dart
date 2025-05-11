@@ -1,11 +1,15 @@
-import 'package:bab_babbab_front/screens/posts/posts_page.dart';
+import 'package:bab_babbab_front/screens/home/home.dart';
+import 'package:bab_babbab_front/screens/main/InfoPage.dart';
 import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/screens/main/selectPage.dart';
 import 'package:bab_babbab_front/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:bab_babbab_front/screens/posts/post_detail.dart';
+
+import 'package:bab_babbab_front/screens/home/home.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 void main() async {
+  await dotenv.load(fileName: "assets/config/.env");
   WidgetsFlutterBinding.ensureInitialized();
   if (Firebase.apps.isEmpty) {
     await Firebase.initializeApp(
@@ -29,7 +33,8 @@ class MainApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       title: 'bab-babbab',
-      home: PostDetailPage(),
+
+      home: InformationPage(),
     );
   }
 }
