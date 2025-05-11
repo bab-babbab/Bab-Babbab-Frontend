@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:bab_babbab_front/widgets/bottom_nav_bar.dart'; 
-import 'package:bab_babbab_front/screens/ranking/ranking.dart'; 
+
+import 'package:bab_babbab_front/widgets/bottom_nav_bar.dart';
+import 'package:bab_babbab_front/screens/ranking/ranking.dart';
 import 'package:bab_babbab_front/screens/home/foodBoardPage.dart';
 import 'package:bab_babbab_front/screens/posts/postsPage.dart';
 import 'package:http/http.dart' as http;
@@ -28,7 +29,11 @@ class _HomePageState extends State<HomePage> {
     ];
   }
 
-
+  final List<Widget> _pages = [
+    _HomeMainContent(),
+    RankingPage(),
+    Center(child: Text('내 정보 페이지')),
+  ];
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -39,6 +44,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
+
         onPressed: (){},
         elevation: 0,
         backgroundColor: Color(0xffFFAD0A),
@@ -46,7 +52,7 @@ class _HomePageState extends State<HomePage> {
       ),
       backgroundColor: Color(0xffF7F8F9),
       body: _pages[_selectedIndex],
-      bottomNavigationBar: CustomBottomNav(  
+      bottomNavigationBar: CustomBottomNav(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
       ),
@@ -83,9 +89,10 @@ class _HomeMainContentState extends State<_HomeMainContent> {
     }
   }
 
+
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width; 
+    double screenWidth = MediaQuery.of(context).size.width;
     double containerWidth = screenWidth - 50;
 
     return Padding(
@@ -95,22 +102,17 @@ class _HomeMainContentState extends State<_HomeMainContent> {
         children: [
           Text(
             '정수진님\n오늘도 수고 했어요!',
-            style: TextStyle(
-              fontFamily: 'Pretendard',
-              fontSize: 24,
-            ),
+            style: TextStyle(fontFamily: 'Pretendard', fontSize: 24),
           ),
           SizedBox(height: 28),
           Row(
             children: [
               Container(
-                width: containerWidth / 2 - 7, 
+                width: containerWidth / 2 - 7,
                 height: 213,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(16),
-                  ),
+                  borderRadius: BorderRadius.all(Radius.circular(16)),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -176,8 +178,11 @@ class _HomeMainContentState extends State<_HomeMainContent> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
                       onTap: () {
-                        Navigator.push(context, 
-                          MaterialPageRoute(builder: (context) => FoodBoardPage()),
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => FoodBoardPage(),
+                          ),
                         );
                       },
                       child: Container(
@@ -255,9 +260,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
             height: 74,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.all(
-                Radius.circular(16),
-              ),
+              borderRadius: BorderRadius.all(Radius.circular(16)),
             ),
             child: Center(
               child: Text(
@@ -273,10 +276,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
           SizedBox(height: 43),
           Text(
             '환경 이슈',
-            style: TextStyle(
-              fontFamily: 'Pretendard',
-              fontSize: 20,
-            ),
+            style: TextStyle(fontFamily: 'Pretendard', fontSize: 20),
           ),
           SizedBox(height: 17),
           Container(
@@ -284,9 +284,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
             height: 126,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.all(
-                Radius.circular(16),
-              ),
+              borderRadius: BorderRadius.all(Radius.circular(16)),
             ),
           ),
         ],
