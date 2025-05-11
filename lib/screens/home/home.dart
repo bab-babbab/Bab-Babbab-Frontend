@@ -3,6 +3,7 @@ import 'package:bab_babbab_front/widgets/bottom_nav_bar.dart';
 import 'package:bab_babbab_front/screens/ranking/ranking.dart'; 
 import 'package:bab_babbab_front/screens/home/foodBoardPage.dart';
 import 'package:bab_babbab_front/screens/posts/postsPage.dart';
+import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -13,13 +14,20 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+  late List<Widget> _pages;
 
-  final List<Widget> _pages = [
-    _HomeMainContent(), 
-    PostsPage(),
-    RankingPage(),
-    Center(child: Text('내 정보 페이지')),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    String userId = 'user-123'; 
+    _pages = [
+      _HomeMainContent(userId: userId),
+      PostsPage(),
+      RankingPage(),
+      Center(child: Text('내 정보 페이지')),
+    ];
+  }
+
 
   void _onItemTapped(int index) {
     setState(() {
@@ -32,7 +40,6 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: (){},
-        child: const Icon(Icons.add, color: Colors.white),
         elevation: 0,
         backgroundColor: Color(0xffFFAD0A),
         shape: CircleBorder(),
@@ -46,8 +53,35 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-class _HomeMainContent extends StatelessWidget {
-  const _HomeMainContent({super.key});
+
+class _HomeMainContent extends StatefulWidget {
+  final String userId;
+  const _HomeMainContent({super.key, required this.userId});
+
+  @override
+  State<_HomeMainContent> createState() => _HomeMainContentState();
+}
+
+class _HomeMainContentState extends State<_HomeMainContent> {
+  late Future<int> streakCount;
+
+  @override
+  void initState() {
+    super.initState();
+    streakCount = fetchStreakCount();
+  }
+
+  Future<int> fetchStreakCount() async {
+    final response = await http.get(
+      Uri.parse('http://localhost:3000/stats/sequence/${widget.userId}'),
+    );
+
+    if (response.statusCode == 200) {
+      return int.parse(response.body);
+    } else {
+      throw Exception('연속 일수 가져오기 실패함');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,6 +112,60 @@ class _HomeMainContent extends StatelessWidget {
                     Radius.circular(16),
                   ),
                 ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  children: [
+                    const SizedBox(height: 3),
+                    FutureBuilder<int>(
+                      future: streakCount,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return const Text("에러 발생");
+                        } else {
+                          final count = snapshot.data!;
+                          return Stack(
+                            clipBehavior: Clip.none,
+                            alignment: Alignment.center,
+                            children: [
+                              SizedBox(
+                                width: 110,
+                                height: 110,
+                                child: Center(
+                                  child: Text(
+                                    '$count',
+                                    style: const TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              Image.asset(
+                                'assets/icon/circle-line.png',
+                                width: 110,
+                                height: 110,
+                              ),
+                              Positioned(
+                                top: -20,
+                                child: Image.asset(
+                                  'assets/icon/fire.png',
+                                  width: 40,
+                                  height: 40,
+                                ),
+                              ),
+                            ],
+                          );
+                        }
+                      },
+                    ),
+                    const Text(
+                      '연속 성공!',
+                      style: TextStyle(fontSize: 15),
+                    ),
+                  ],
+                ),
               ),
               SizedBox(width: 14),
               Column(
@@ -87,7 +175,7 @@ class _HomeMainContent extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
-                      onTap: (){
+                      onTap: () {
                         Navigator.push(context, 
                           MaterialPageRoute(builder: (context) => FoodBoardPage()),
                         );
@@ -95,7 +183,7 @@ class _HomeMainContent extends StatelessWidget {
                       child: Container(
                         width: containerWidth / 2 - 7,
                         height: 96,
-                        padding: EdgeInsets.only(top: 17,left: 30,bottom: 17),
+                        padding: EdgeInsets.only(top: 17, left: 30, bottom: 17),
                         alignment: Alignment.centerLeft,
                         child: Row(
                           children: [
@@ -127,13 +215,11 @@ class _HomeMainContent extends StatelessWidget {
                     borderRadius: BorderRadius.circular(16),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
-                      onTap: (){
-                        
-                      },
+                      onTap: () {},
                       child: Container(
                         width: containerWidth / 2 - 7,
                         height: 96,
-                        padding: EdgeInsets.only(top: 17,left: 30,bottom: 17),
+                        padding: EdgeInsets.only(top: 17, left: 30, bottom: 17),
                         alignment: Alignment.centerLeft,
                         child: Row(
                           children: [
