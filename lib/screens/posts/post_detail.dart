@@ -239,7 +239,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
             SizedBox(width: 55), // 텍스트 필드와 전송 아이콘 사이 간격
 
             Transform.translate(
-              offset: const Offset(0, -5ㅇ), // X축(-10), Y축(-5) 방향으로 이동 (음수 적용)
+              offset: const Offset(0, -5), // X축(-10), Y축(-5) 방향으로 이동 (음수 적용)
               child: IconButton(
                 icon: Transform.rotate(
                   angle: -40 * (3.141592 / 180), // 반시계 방향 40도 회전
