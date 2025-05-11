@@ -1,11 +1,14 @@
-import 'package:flutter/material.dart';
-import 'package:dropdown_button2/dropdown_button2.dart';
-import 'package:image_picker/image_picker.dart';
 import 'dart:io';
+
+import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+
+import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:bab_babbab_front/screens/home/home.dart';
 
 class InformationPage extends StatefulWidget {
-  const InformationPage({super.key});
+  const InformationPage({Key? key}) : super(key: key);
 
   @override
   _InformationPageState createState() => _InformationPageState();
@@ -13,9 +16,7 @@ class InformationPage extends StatefulWidget {
 
 class _InformationPageState extends State<InformationPage> {
   final picker = ImagePicker();
-  XFile? image; // 카메라로 촬영한 이미지를 저장할 변수
-  List<XFile?> multiImage = []; // 갤러리에서 여러 장의 사진을 선택해서 저장할 변수
-  List<XFile?> images = []; // 가져온 사진들을 보여주기 위한 변수
+  XFile? _pickedFile; // 카메라로 촬영한 이미지를 저장할 변수
 
   List<String> gradeList = ['1학년', '2학년', '3학년'];
   List<String> classList = ['1반', '2반', '3반', '4반', '5반', '6반'];
@@ -24,6 +25,7 @@ class _InformationPageState extends State<InformationPage> {
 
   @override
   Widget build(BuildContext context) {
+    final _imageSize = MediaQuery.of(context).size.width / 4;
     return Scaffold(
       backgroundColor: const Color(0xffFFFFFF),
       body: Padding(
@@ -163,33 +165,74 @@ class _InformationPageState extends State<InformationPage> {
               ),
             ),
             SizedBox(height: 30),
+            Column(
+              children: [
+                if (_pickedFile == null)
+                  Container(
+                    constraints: BoxConstraints(
+                      minHeight: _imageSize,
+                      minWidth: _imageSize,
+                    ),
+                    child: GestureDetector(
+                      onTap: () {
+                        _showBottomSheet();
+                      },
+                      child: Stack(
+                        alignment: Alignment.center,
+                        children: [
+                          // 큰 원 (배경)
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFFF3E0), // 연한 오렌지색 배경
+                              shape: BoxShape.circle,
+                            ),
+                          ),
 
-            //갤러리에서 가져오기
-            Container(
-              margin: EdgeInsets.all(10),
-              padding: EdgeInsets.all(5),
-              height: 100,
-              width: 100,
-              decoration: BoxDecoration(
-                color: Color(0xffFFEBC4),
-                borderRadius: BorderRadius.circular(999),
-              ),
-              child: IconButton(
-                onPressed: () async {
-                  multiImage = await picker.pickMultiImage();
-                  setState(() {
-                    //갤러리에서 가지고 온 사진들은 리스트 변수에 저장되므로 addAll()을 사용해서 images와 multiImage 리스트를 합쳐줍니다.
-                    images.addAll(multiImage);
-                  });
-                },
-                icon: Icon(
-                  Icons.add_photo_alternate_outlined,
-                  size: 30,
-                  color: Color(0xffFFAA00),
-                ),
-              ),
+                          // 가운데 이미지 아이콘
+                          const Icon(
+                            Icons.image, // 또는 Icons.image_outlined
+                            size: 30,
+                            color: Color(0xFFFFB300), // 진한 오렌지
+                          ),
+
+                          // 오른쪽 아래에 + 버튼
+                          Positioned(
+                            bottom: 3,
+                            right: 3,
+                            child: Container(
+                              width: 30,
+                              height: 30,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFFFB300), // 진한 오렌지
+                                shape: BoxShape.circle,
+                              ),
+                              child: const Icon(Icons.add, color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                else
+                  Container(
+                    width: _imageSize,
+                    height: _imageSize,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        width: 2,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                      image: DecorationImage(
+                        image: FileImage(File(_pickedFile!.path)),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+              ],
             ),
-
             SizedBox(height: 100),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -218,5 +261,64 @@ class _InformationPageState extends State<InformationPage> {
         ),
       ),
     );
+  }
+
+  _showBottomSheet() {
+    return showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      ),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: () => _getCameraImage(),
+              child: const Text('사진찍기'),
+            ),
+            const SizedBox(height: 10),
+            const Divider(thickness: 3),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () => _getPhotoLibraryImage(),
+              child: const Text('라이브러리에서 불러오기'),
+            ),
+            const SizedBox(height: 20),
+          ],
+        );
+      },
+    );
+  }
+
+  _getCameraImage() async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.camera,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        _pickedFile = pickedFile;
+      });
+    } else {
+      if (kDebugMode) {
+        print('이미지 선택안함');
+      }
+    }
+  }
+
+  _getPhotoLibraryImage() async {
+    final pickedFile = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+    );
+    if (pickedFile != null) {
+      setState(() {
+        _pickedFile = pickedFile;
+      });
+    } else {
+      if (kDebugMode) {
+        print('이미지 선택안함');
+      }
+    }
   }
 }
