@@ -133,7 +133,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                           margin: const EdgeInsets.only(
                             bottom: 20,
                           ), // 댓글 간격 늘리기
-                          padding: const EdgeInsets.all(30), // 패딩 늘리기
+                          padding: const EdgeInsets.all(30), // 패딩 늘리기!
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
