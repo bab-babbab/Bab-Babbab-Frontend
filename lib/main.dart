@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/screens/main/selectPage.dart';
 import 'package:bab_babbab_front/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
+
 import 'package:bab_babbab_front/screens/home/home.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
@@ -32,6 +33,7 @@ class MainApp extends StatelessWidget {
       ),
       debugShowCheckedModeBanner: false,
       title: 'bab-babbab',
+
       home: InformationPage(),
     );
   }
