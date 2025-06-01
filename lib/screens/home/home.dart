@@ -20,7 +20,7 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    String userId = 'user-123'; 
+    String userId = 'user-123';
     _pages = [
       _HomeMainContent(userId: userId),
       PostsPage(),
@@ -29,11 +29,6 @@ class _HomePageState extends State<HomePage> {
     ];
   }
 
-  final List<Widget> _pages = [
-    _HomeMainContent(),
-    RankingPage(),
-    Center(child: Text('내 정보 페이지')),
-  ];
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
@@ -44,8 +39,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-
-        onPressed: (){},
+        onPressed: () {},
         elevation: 0,
         backgroundColor: Color(0xffFFAD0A),
         shape: CircleBorder(),
@@ -89,7 +83,6 @@ class _HomeMainContentState extends State<_HomeMainContent> {
     }
   }
 
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width;
@@ -121,7 +114,8 @@ class _HomeMainContentState extends State<_HomeMainContent> {
                     FutureBuilder<int>(
                       future: streakCount,
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return const Text("에러 발생");
@@ -162,10 +156,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
                         }
                       },
                     ),
-                    const Text(
-                      '연속 성공!',
-                      style: TextStyle(fontSize: 15),
-                    ),
+                    const Text('연속 성공!', style: TextStyle(fontSize: 15)),
                   ],
                 ),
               ),
