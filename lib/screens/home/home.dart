@@ -1,9 +1,11 @@
+import 'package:bab_babbab_front/screens/mypage/mypageChange.dart';
 import 'package:flutter/material.dart';
 
 import 'package:bab_babbab_front/widgets/bottom_nav_bar.dart';
 import 'package:bab_babbab_front/screens/ranking/ranking.dart';
 import 'package:bab_babbab_front/screens/home/foodBoardPage.dart';
 import 'package:bab_babbab_front/screens/posts/postsPage.dart';
+import 'package:bab_babbab_front/screens/mypage/mypage.dart';
 import 'package:http/http.dart' as http;
 
 class HomePage extends StatefulWidget {
@@ -25,7 +27,7 @@ class _HomePageState extends State<HomePage> {
       _HomeMainContent(userId: userId),
       PostsPage(),
       RankingPage(),
-      Center(child: Text('내 정보 페이지')),
+      MyPage(),
     ];
   }
 
