@@ -1,5 +1,49 @@
 import 'package:flutter/material.dart';
 
+// 댓글 데이터 모델
+class Comment {
+  final String userName;
+  final String userClass;
+  final String timestamp;
+  final String content;
+
+  Comment({
+    required this.userName,
+    required this.userClass,
+    required this.timestamp,
+    required this.content,
+  });
+}
+
+// 더미 댓글 리스트
+final List<Comment> comments = [
+  Comment(
+    userName: "김수지",
+    userClass: "2학년/3반",
+    timestamp: "2024.02.01 오후 8:43",
+    content: "오늘도 수고 많았습니다!! 선배 존경합니다!",
+  ),
+  Comment(
+    userName: "박지훈",
+    userClass: "2학년/1반",
+    timestamp: "2024.02.01 오후 8:45",
+    content: "정말 열심히 하시네요! 항상 응원합니다!",
+  ),
+  Comment(
+    userName: "양혜원",
+    userClass: "3학년/2반",
+    timestamp: "2024.02.15 오후 18:45",
+    content: "너 정말 열심히 한다. 힘내.",
+  ),
+  Comment(
+    userName: "김지혜",
+    userClass: "2학년/1반",
+    timestamp: "2024.08.21 오후 8:21",
+    content: "상미의 생일에 이러한 것을 실천 하다니 정말 좋아",
+  ),
+  // 필요에 따라 댓글 추가 가능
+];
+
 class PostDetailPage extends StatefulWidget {
   const PostDetailPage({super.key});
 
@@ -124,16 +168,16 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     const SizedBox(height: 14),
 
                     // 댓글 리스트
+                    // 댓글 리스트 위젯 부분 수정
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: 4,
+                      itemCount: comments.length,
                       itemBuilder: (context, index) {
+                        final comment = comments[index];
                         return Container(
-                          margin: const EdgeInsets.only(
-                            bottom: 20,
-                          ), // 댓글 간격 늘리기
-                          padding: const EdgeInsets.all(30), // 패딩 늘리기!
+                          margin: const EdgeInsets.only(bottom: 20),
+                          padding: const EdgeInsets.all(30),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(10),
@@ -153,24 +197,24 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                 mainAxisAlignment:
                                     MainAxisAlignment.spaceBetween,
                                 children: [
-                                  const Text(
-                                    "김수지",
-                                    style: TextStyle(
+                                  Text(
+                                    comment.userName,
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.w600,
                                       color: Color(0xFF6F6F6F),
                                     ),
-                                  ), // 간격 줄이기
-                                  const Text(
-                                    "2학년/3반",
-                                    style: TextStyle(
+                                  ),
+                                  Text(
+                                    comment.userClass,
+                                    style: const TextStyle(
                                       fontWeight: FontWeight.w500,
                                       color: Color(0xFFAAAAAA),
                                     ),
                                   ),
                                   const SizedBox(width: 30),
-                                  const Text(
-                                    "2024.02.01 오후 8:43",
-                                    style: TextStyle(
+                                  Text(
+                                    comment.timestamp,
+                                    style: const TextStyle(
                                       color: Color(0xFFAAAAAA),
                                       fontWeight: FontWeight.w400,
                                       fontSize: 14,
@@ -179,9 +223,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
                                 ],
                               ),
                               const SizedBox(height: 20),
-                              const Text(
-                                "오늘도 수고 많았습니다!! 선배 존경합니다!",
-                                style: TextStyle(
+                              Text(
+                                comment.content,
+                                style: const TextStyle(
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
                                 ),
