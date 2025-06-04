@@ -53,10 +53,20 @@ class PostDetailPage extends StatefulWidget {
 
 class _PostDetailPageState extends State<PostDetailPage> {
   final TextEditingController _commentController = TextEditingController();
+  final PageController _pageController = PageController(); // 슬라이드 컨트롤러
+  int _currentImageIndex = 0; // 현재 이미지 인덱스
+
+  // 더미 이미지 리스트 (실제로는 선택된 이미지들로 대체)
+  final List<String> _images = [
+    'assets/images/image1.jpg', // 실제 이미지 경로 또는 네트워크 URL
+    'assets/images/image2.jpg',
+    'assets/images/image3.jpg',
+  ];
 
   @override
   void dispose() {
     _commentController.dispose();
+    _pageController.dispose();
     super.dispose();
   }
 
@@ -114,7 +124,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // 이미지 박스
+                    // 이미지 슬라이더
                     Container(
                       width: double.infinity,
                       height: 350,
@@ -122,25 +132,86 @@ class _PostDetailPageState extends State<PostDetailPage> {
                         color: Color(0xFFC4C4C4),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      alignment: Alignment.bottomRight,
-                      padding: const EdgeInsets.all(8),
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 5,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.5),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          "1/3",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
+                      child: Stack(
+                        children: [
+                          // 이미지 슬라이더
+                          PageView.builder(
+                            controller: _pageController,
+                            onPageChanged: (index) {
+                              setState(() {
+                                _currentImageIndex = index;
+                              });
+                            },
+                            itemCount: _images.length,
+                            itemBuilder: (context, index) {
+                              return Container(
+                                decoration: BoxDecoration(
+                                  color: Color(0xFFC4C4C4), // 회색 배경 유지
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                                // 실제 이미지가 있다면 이 부분을 주석 해제
+                                /*
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(10),
+                                  child: Image.asset(
+                                    _images[index],
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) {
+                                      return Container(
+                                        color: Color(0xFFC4C4C4),
+                                        child: Center(
+                                          child: Text(
+                                            'Image ${index + 1}',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                        ),
+                                      );
+                                    },
+                                  ),
+                                ),
+                                */
+                                // 임시로 회색 배경에 텍스트 표시
+                                child: Center(
+                                  child: Text(
+                                    'Image ${index + 1}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
                           ),
-                        ),
+
+                          // 이미지 카운터 (우하단)
+                          Positioned(
+                            bottom: 8,
+                            right: 8,
+                            child: Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.black.withOpacity(0.5),
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                "${_currentImageIndex + 1}/${_images.length}",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 20),
