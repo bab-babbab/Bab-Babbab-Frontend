@@ -1,4 +1,4 @@
-import 'package:bab_babbab_front/screens/main/InfoPage.dart';
+import 'package:bab_babbab_front/screens/information/InfoPage.dart';
 import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';

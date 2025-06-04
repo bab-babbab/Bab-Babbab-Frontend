@@ -7,7 +7,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:bab_babbab_front/screens/main/selectPage.dart';
+import 'package:bab_babbab_front/screens/information/selectPage.dart';
 import 'package:bab_babbab_front/main.dart';
 
 void main() {
