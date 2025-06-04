@@ -71,7 +71,7 @@ class _InformationPageState extends State<InformationPage> {
             SizedBox(height: 30),
             Column(
               children: [
-                if (_pickedFile == null)
+                if (_pickedFile == null) // 이미지 파일을 선택하지 않았을 때
                   Container(
                     constraints: BoxConstraints(
                       minHeight: _imageSize,
@@ -119,20 +119,35 @@ class _InformationPageState extends State<InformationPage> {
                       ),
                     ),
                   )
-                else
+                else // 이미지 선택했을 떄
                   Container(
                     width: _imageSize,
                     height: _imageSize,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      border: Border.all(
-                        width: 2,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
                       image: DecorationImage(
                         image: FileImage(File(_pickedFile!.path)),
                         fit: BoxFit.cover,
                       ),
+                    ),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        // 오른쪽 아래에 + 버튼
+                        Positioned(
+                          bottom: 3,
+                          right: 3,
+                          child: Container(
+                            width: 30,
+                            height: 30,
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFFFB300), // 진한 오렌지
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.add, color: Colors.white),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
               ],

@@ -24,6 +24,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>디버깅을 위해 로컬 네트워크를 사용합니다.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>카메라 사용 권한 요청</string>
 	<key>NSPhotoLibraryUsageDescription</key>
