@@ -61,8 +61,8 @@ class MyPage extends StatelessWidget {
                             // 배경 원형 선 이미지
                             Image.asset(
                               'assets/icon/circle-line.png',
-                              width: 60,
-                              height: 60,
+                              width: 45,
+                              height: 48,
                             ),
 
                             // 숫자 텍스트
@@ -77,11 +77,11 @@ class MyPage extends StatelessWidget {
 
                             // 불꽃 아이콘 (위쪽에 위치)
                             Positioned(
-                              top: -10,
+                              top: -5,
                               child: Image.asset(
                                 'assets/icon/fire.png',
-                                width: 20,
-                                height: 20,
+                                width: 16,
+                                height: 16,
                               ),
                             ),
                           ],
