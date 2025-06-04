@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:bab_babbab_front/screens/main/InfoStuPage.dart';
+import 'package:bab_babbab_front/screens/information/InfoStuPage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
