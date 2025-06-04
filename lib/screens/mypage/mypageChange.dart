@@ -1,74 +1,81 @@
 import 'dart:io';
-
-import 'package:bab_babbab_front/screens/information/InfoStuPage.dart';
-import 'package:flutter/foundation.dart';
+import 'package:bab_babbab_front/screens/mypage/mypage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
 
-class InformationPage extends StatefulWidget {
-  const InformationPage({Key? key}) : super(key: key);
+class MypageChange extends StatefulWidget {
+  const MypageChange({Key? key}) : super(key: key);
 
   @override
-  _InformationPageState createState() => _InformationPageState();
+  _MypageChangeState createState() => _MypageChangeState();
 }
 
-class _InformationPageState extends State<InformationPage> {
+class _MypageChangeState extends State<MypageChange> {
   final picker = ImagePicker();
   XFile? _pickedFile; // 카메라로 촬영한 이미지를 저장할 변수
+  File? _profileImage;
+  final TextEditingController _statusController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
     final _imageSize = MediaQuery.of(context).size.width / 4;
     return Scaffold(
-      backgroundColor: const Color(0xffFFFFFF),
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        title: const Text(
+          '정보 변경',
+          style: TextStyle(
+            color: Color(0xff575757),
+            fontSize: 22,
+            fontFamily: 'Pretendard',
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios, color: Color(0xffD1D2D1)),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: Padding(
-        padding: const EdgeInsets.all(30.0),
+        padding: const EdgeInsets.symmetric(horizontal: 28.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const SizedBox(height: 100),
+            const SizedBox(height: 43),
             const Text(
-              "반가워요! \n정보를 작성해주세요.",
+              '상태 메시지 변경',
               style: TextStyle(
                 fontFamily: 'Pretendard',
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
+                fontWeight: FontWeight.w600,
+                fontSize: 20,
               ),
             ),
-
-            SizedBox(height: 30),
+            const SizedBox(height: 8),
             TextField(
-              decoration: InputDecoration(
-                hintText: '이름을 입력해주세요.',
-                fillColor: Color(0xffF8F8F8),
-                filled: true,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  borderSide: BorderSide(width: 1, color: Color(0xffF8F8F8)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  borderSide: BorderSide(color: Color(0xffF8F8F8)),
-                ),
+              maxLength: 20,
+              decoration: const InputDecoration(
+                hintText: '한마디를 작성해주세요.',
+                counterText: '최대 20자',
               ),
             ),
-            SizedBox(height: 30),
-            TextField(
-              decoration: InputDecoration(
-                hintText: '상태메세지를 입력해주세요.',
-                fillColor: Color(0xffF8F8F8),
-                filled: true,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  borderSide: BorderSide(width: 1, color: Color(0xffF8F8F8)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  borderSide: BorderSide(color: Color(0xffF8F8F8)),
-                ),
+            const SizedBox(height: 69),
+            const Text(
+              '프로필 사진 선택',
+              style: TextStyle(
+                fontFamily: 'Pretendard',
+                fontWeight: FontWeight.w600,
+                fontSize: 20,
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 6),
+            const Text(
+              '프로필 사진을 업로드해주세요.',
+              style: TextStyle(color: Color(0xffAAAAAA), fontSize: 14),
+            ),
+            const SizedBox(height: 16),
             Column(
               children: [
                 if (_pickedFile == null) // 이미지 파일을 선택하지 않았을 때
@@ -78,9 +85,7 @@ class _InformationPageState extends State<InformationPage> {
                       minWidth: _imageSize,
                     ),
                     child: GestureDetector(
-                      onTap: () {
-                        _showBottomSheet();
-                      },
+                      onTap: _showBottomSheet,
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
@@ -152,30 +157,38 @@ class _InformationPageState extends State<InformationPage> {
                   ),
               ],
             ),
-            SizedBox(height: 210),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(336, 60),
-                backgroundColor: Color(0xffFFAD0A),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
+            SizedBox(height: 236),
+            SizedBox(
+              width: double.infinity,
+              height: 60,
+              child: ElevatedButton(
+                onPressed: () {
+                  // 저장 로직 처리
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => MyPage()),
+                  );
+                  print('상태 메시지 변경');
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFFFB800),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: const Text(
+                  '정보 변경',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 16,
+                    fontFamily: 'Pretendard',
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-              child: Text(
-                '넘어가기',
-                style: TextStyle(
-                  fontFamily: 'Pretendard',
-                  fontSize: 20,
-                  color: Color(0xffFFFFFF),
-                ),
-              ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => InformationStuPage()),
-                );
-              },
             ),
+
+            const SizedBox(height: 16),
           ],
         ),
       ),
