@@ -30,7 +30,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'bab-babbab',
 
-      home: InformationPage(),
+      home: PostsPage(),
     );
   }
 }
