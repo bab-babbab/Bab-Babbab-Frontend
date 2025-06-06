@@ -198,58 +198,38 @@ class _MypageChangeState extends State<MypageChange> {
   void _showBottomSheet() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
-      backgroundColor: Colors.white, // 배경 흰색
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 24),
+      builder: (BuildContext context) {
+        return Container(
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // 사진 찍기 버튼
-              SizedBox(
-                height: 40,
-                width: 250,
-                child: OutlinedButton(
-                  onPressed: _getCameraImage,
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xffAAAAAA)),
-                    foregroundColor: Colors.black,
-                    textStyle: const TextStyle(
-                      fontFamily: 'Pretendard',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  child: const Text('사진 찍기'),
-                ),
+              const Text(
+                '이미지 선택',
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
-
-              const SizedBox(height: 10),
-
-              const Divider(color: Color(0xffAAAAAA)),
-
-              const SizedBox(height: 10),
-
-              // 라이브러리에서 불러오기 버튼
-              SizedBox(
-                height: 40,
-                width: 250,
-                child: OutlinedButton(
-                  onPressed: _getPhotoLibraryImage,
-                  style: OutlinedButton.styleFrom(
-                    side: const BorderSide(color: Color(0xffAAAAAA)),
-                    foregroundColor: Colors.black,
-                    textStyle: const TextStyle(
-                      fontFamily: 'Pretendard',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  child: const Text('라이브러리에서 불러오기'),
+              const SizedBox(height: 20),
+              ListTile(
+                leading: const Icon(Icons.camera_alt, color: Color(0xFF575757)),
+                title: const Text('카메라로 촬영'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.camera);
+                },
+              ),
+              ListTile(
+                leading: const Icon(
+                  Icons.photo_library,
+                  color: Color(0xFF575757),
                 ),
+                title: const Text('앨범에서 선택'),
+                onTap: () {
+                  Navigator.pop(context);
+                  _pickImage(ImageSource.gallery);
+                },
               ),
             ],
           ),
@@ -258,25 +238,8 @@ class _MypageChangeState extends State<MypageChange> {
     );
   }
 
-  _getCameraImage() async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.camera,
-    );
-    if (pickedFile != null) {
-      setState(() {
-        _pickedFile = pickedFile;
-      });
-    } else {
-      if (kDebugMode) {
-        print('이미지 선택안함');
-      }
-    }
-  }
-
-  _getPhotoLibraryImage() async {
-    final pickedFile = await ImagePicker().pickImage(
-      source: ImageSource.gallery,
-    );
+  void _pickImage(ImageSource source) async {
+    final pickedFile = await ImagePicker().pickImage(source: source);
     if (pickedFile != null) {
       setState(() {
         _pickedFile = pickedFile;
