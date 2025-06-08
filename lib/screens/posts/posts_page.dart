@@ -57,7 +57,7 @@ class DashedBorderPainter extends CustomPainter {
   bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
 
-// PostItem 위젯 (다중 이미지 선택 기능 포함)
+// PostItem 위젯 (기본 이미지 + 1개 추가 가능)
 class PostItem extends StatefulWidget {
   const PostItem({super.key});
 
@@ -68,7 +68,8 @@ class PostItem extends StatefulWidget {
 class _PostItemState extends State<PostItem> {
   List<File> _selectedImages = [];
   final ImagePicker _picker = ImagePicker();
-  final int maxImages = 3; // 최대 이미지 개수
+  final int maxImages = 2; // 최대 이미지 개수를 2개로 변경
+  bool _hasDefaultImage = true; // 기본 이미지 존재 여부
 
   // 사용자 정보 변수화
   final String userName = '정수진';
@@ -115,17 +116,6 @@ class _PostItemState extends State<PostItem> {
                   _pickImage(ImageSource.gallery);
                 },
               ),
-              ListTile(
-                leading: Icon(
-                  Icons.photo_library_outlined,
-                  color: Color(0xFF575757),
-                ),
-                title: Text('여러 이미지 선택'),
-                onTap: () {
-                  Navigator.pop(context);
-                  _pickMultipleImages();
-                },
-              ),
             ],
           ),
         );
@@ -154,46 +144,44 @@ class _PostItemState extends State<PostItem> {
     }
   }
 
-  Future<void> _pickMultipleImages() async {
-    try {
-      final List<XFile> pickedFiles = await _picker.pickMultiImage(
-        maxWidth: 1800,
-        maxHeight: 1800,
-        imageQuality: 80,
-      );
-
-      if (pickedFiles.isNotEmpty) {
-        setState(() {
-          for (var file in pickedFiles) {
-            if (_selectedImages.length < maxImages) {
-              _selectedImages.add(File(file.path));
-            }
-          }
-        });
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('이미지를 선택하는 중 오류가 발생했습니다.')));
-    }
-  }
-
-  void _removeImage(int index) {
-    setState(() {
-      _selectedImages.removeAt(index);
-    });
-  }
-
   Widget _buildImageContainer(int index) {
-    bool isAddButton = index >= _selectedImages.length;
-    bool showAddButton = _selectedImages.length < maxImages;
+    // 기본 이미지 (첫 번째)
+    if (index == 0 && _hasDefaultImage) {
+      return Container(
+        width: 90,
+        height: 75,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Color(0xFFBDBDBD), // 회색 배경 (기본 이미지)
+        ),
+        child: Icon(Icons.image, size: 40, color: Colors.white),
+      );
+    }
 
-    if (isAddButton && showAddButton) {
-      // 이미지 추가 버튼 (노란색 실선 박스)
+    // 실제 선택된 이미지들
+    int imageIndex = _hasDefaultImage ? index - 1 : index;
+    if (imageIndex >= 0 && imageIndex < _selectedImages.length) {
+      return Container(
+        width: 90,
+        height: 75,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(8),
+          color: Color(0xFFBDBDBD), // 회색 배경
+          image: DecorationImage(
+            image: FileImage(_selectedImages[imageIndex]),
+            fit: BoxFit.cover,
+          ),
+        ),
+      );
+    }
+
+    // 추가 버튼 (노란색 점선 박스)
+    int totalImages = (_hasDefaultImage ? 1 : 0) + _selectedImages.length;
+    if (totalImages < maxImages) {
       return GestureDetector(
         onTap: _showImageSourceDialog,
         child: Container(
-          width: 95,
+          width: 90,
           height: 75,
           decoration: BoxDecoration(
             color: Color(0xFFFFF9EC),
@@ -207,7 +195,7 @@ class _PostItemState extends State<PostItem> {
               dashSpace: 3,
             ),
             child: Container(
-              width: 95,
+              width: 90,
               height: 75,
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -217,27 +205,20 @@ class _PostItemState extends State<PostItem> {
           ),
         ),
       );
-    } else if (!isAddButton) {
-      // 선택된 이미지 (삭제 기능 없음)
-      return Container(
-        width: 95,
-        height: 75,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(8),
-          color: Color(0xFFBDBDBD), // 회색 배경
-          image: DecorationImage(
-            image: FileImage(_selectedImages[index]),
-            fit: BoxFit.cover,
-          ),
-        ),
-      );
-    } else {
-      return SizedBox.shrink();
     }
+
+    return SizedBox.shrink();
   }
 
   @override
   Widget build(BuildContext context) {
+    // 총 컨테이너 개수 계산: 기본이미지(1) + 선택된이미지들 + 추가버튼(조건부)
+    int totalContainers = 1 + _selectedImages.length; // 기본 이미지 + 선택된 이미지들
+    int totalImages = (_hasDefaultImage ? 1 : 0) + _selectedImages.length;
+    if (totalImages < maxImages) {
+      totalContainers += 1; // 추가 버튼
+    }
+
     return Container(
       margin: EdgeInsets.only(bottom: 15),
       padding: EdgeInsets.all(20),
@@ -266,7 +247,6 @@ class _PostItemState extends State<PostItem> {
                   color: Color(0xFF333333),
                 ),
               ),
-              SizedBox(width: 10),
               Text(
                 userGrade,
                 style: TextStyle(fontSize: 12, color: Color(0xFF999999)),
@@ -287,13 +267,12 @@ class _PostItemState extends State<PostItem> {
           ),
           SizedBox(height: 15),
 
-          // 이미지 그리드 (처음에는 노란색 박스만, 이미지 추가시 회색 컨테이너로 변경)
+          // 이미지 그리드 (기본이미지 + 추가이미지들 + 추가버튼)
           Wrap(
             spacing: 10,
             runSpacing: 10,
             children: List.generate(
-              _selectedImages.length +
-                  (_selectedImages.length < maxImages ? 1 : 0),
+              totalContainers,
               (index) => _buildImageContainer(index),
             ),
           ),

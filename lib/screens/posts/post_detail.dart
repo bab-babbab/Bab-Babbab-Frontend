@@ -15,35 +15,6 @@ class Comment {
   });
 }
 
-// 더미 댓글 리스트
-final List<Comment> comments = [
-  Comment(
-    userName: "김수지",
-    userClass: "2학년/3반",
-    timestamp: "2024.02.01 오후 8:43",
-    content: "오늘도 수고 많았습니다!! 선배 존경합니다!",
-  ),
-  Comment(
-    userName: "박지훈",
-    userClass: "2학년/1반",
-    timestamp: "2024.02.01 오후 8:45",
-    content: "정말 열심히 하시네요! 항상 응원합니다!",
-  ),
-  Comment(
-    userName: "양혜원",
-    userClass: "3학년/2반",
-    timestamp: "2024.02.15 오후 18:45",
-    content: "너 정말 열심히 한다. 힘내.",
-  ),
-  Comment(
-    userName: "김지혜",
-    userClass: "2학년/1반",
-    timestamp: "2024.08.21 오후 8:21",
-    content: "상미의 생일에 이러한 것을 실천 하다니 정말 좋아",
-  ),
-  // 필요에 따라 댓글 추가 가능
-];
-
 class PostDetailPage extends StatefulWidget {
   const PostDetailPage({super.key});
 
@@ -53,15 +24,89 @@ class PostDetailPage extends StatefulWidget {
 
 class _PostDetailPageState extends State<PostDetailPage> {
   final TextEditingController _commentController = TextEditingController();
-  final PageController _pageController = PageController(); // 슬라이드 컨트롤러
-  int _currentImageIndex = 0; // 현재 이미지 인덱스
+  final PageController _pageController = PageController();
+  int _currentImageIndex = 0;
 
-  // 더미 이미지 리스트 (실제로는 선택된 이미지들로 대체)
+  // 댓글 리스트를 상태로 관리
+  final List<Comment> _comments = [
+    Comment(
+      userName: "김수지",
+      userClass: "2학년/3반",
+      timestamp: "2024.02.01 오후 8:43",
+      content: "오늘도 수고 많았습니다!! 선배 존경합니다!",
+    ),
+    Comment(
+      userName: "박지훈",
+      userClass: "2학년/1반",
+      timestamp: "2024.02.01 오후 8:45",
+      content: "정말 열심히 하시네요! 항상 응원합니다!",
+    ),
+    Comment(
+      userName: "양혜원",
+      userClass: "3학년/2반",
+      timestamp: "2024.02.15 오후 18:45",
+      content: "너 정말 열심히 한다. 힘내.",
+    ),
+    Comment(
+      userName: "김지혜",
+      userClass: "2학년/1반",
+      timestamp: "2024.08.21 오후 8:21",
+      content: "상미의 생일에 이러한 것을 실천 하다니 정말 좋아",
+    ),
+  ];
+
   final List<String> _images = [
-    'assets/images/image1.jpg', // 실제 이미지 경로 또는 네트워크 URL
+    'assets/images/image1.jpg',
     'assets/images/image2.jpg',
     'assets/images/image3.jpg',
   ];
+
+  // 현재 시간을 포맷팅하는 함수
+  String _getCurrentTimestamp() {
+    final now = DateTime.now();
+    final hour =
+        now.hour > 12
+            ? now.hour - 12
+            : now.hour == 0
+            ? 12
+            : now.hour;
+    final period = now.hour >= 12 ? '오후' : '오전';
+    final minute = now.minute.toString().padLeft(2, '0');
+
+    return "${now.year}.${now.month.toString().padLeft(2, '0')}.${now.day.toString().padLeft(2, '0')} $period $hour:$minute";
+  }
+
+  // 댓글 추가 함수
+  void _addComment() {
+    String commentText = _commentController.text.trim();
+    if (commentText.isNotEmpty) {
+      setState(() {
+        _comments.add(
+          Comment(
+            userName: "정수진", // 현재 사용자 이름 (실제로는 로그인된 사용자 정보 사용)
+            userClass: "3학년/2반", // 현재 사용자 클래스
+            timestamp: _getCurrentTimestamp(),
+            content: commentText,
+          ),
+        );
+      });
+      _commentController.clear();
+
+      // 댓글 추가 후 스크롤을 맨 아래로 이동 (선택사항)
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          // 약간의 지연 후 스크롤
+          Future.delayed(Duration(milliseconds: 100), () {
+            Scrollable.ensureVisible(
+              context,
+              alignment: 1.0,
+              duration: Duration(milliseconds: 300),
+            );
+          });
+        }
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -83,7 +128,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Colors.white, // ✅ 완전 흰색 고정
+        backgroundColor: Colors.white,
         elevation: 0,
         centerTitle: true,
         scrolledUnderElevation: 0,
@@ -99,17 +144,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-
       body: SingleChildScrollView(
         child: Container(
-          color: Colors.white, // 배경색 흰색 설정
+          color: Colors.white,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // AppBar 아래 간격 추가
               const SizedBox(height: 16),
-
-              // 게시물 내용
               Container(
                 padding: const EdgeInsets.all(16),
                 child: Column(
@@ -134,7 +175,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
                       ),
                       child: Stack(
                         children: [
-                          // 이미지 슬라이더
                           PageView.builder(
                             controller: _pageController,
                             onPageChanged: (index) {
@@ -146,34 +186,9 @@ class _PostDetailPageState extends State<PostDetailPage> {
                             itemBuilder: (context, index) {
                               return Container(
                                 decoration: BoxDecoration(
-                                  color: Color(0xFFC4C4C4), // 회색 배경 유지
+                                  color: Color(0xFFC4C4C4),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
-                                // 실제 이미지가 있다면 이 부분을 주석 해제
-                                /*
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(10),
-                                  child: Image.asset(
-                                    _images[index],
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) {
-                                      return Container(
-                                        color: Color(0xFFC4C4C4),
-                                        child: Center(
-                                          child: Text(
-                                            'Image ${index + 1}',
-                                            style: TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 18,
-                                            ),
-                                          ),
-                                        ),
-                                      );
-                                    },
-                                  ),
-                                ),
-                                */
-                                // 임시로 회색 배경에 텍스트 표시
                                 child: Center(
                                   child: Text(
                                     'Image ${index + 1}',
@@ -187,8 +202,6 @@ class _PostDetailPageState extends State<PostDetailPage> {
                               );
                             },
                           ),
-
-                          // 이미지 카운터 (우하단)
                           Positioned(
                             bottom: 8,
                             right: 8,
@@ -221,13 +234,11 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     ),
                     const SizedBox(height: 20),
 
-                    // 댓글 개수 표시
-                    const Padding(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 4.0,
-                      ), // 좌우 패딩 설정
+                    // 댓글 개수 표시 (동적으로 업데이트)
+                    Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 4.0),
                       child: Text(
-                        '댓글 4개',
+                        '댓글 ${_comments.length}개',
                         style: TextStyle(
                           color: Colors.black,
                           fontSize: 15,
@@ -238,14 +249,13 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     ),
                     const SizedBox(height: 14),
 
-                    // 댓글 리스트
-                    // 댓글 리스트 위젯 부분 수정
+                    // 댓글 리스트 (동적으로 업데이트)
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
-                      itemCount: comments.length,
+                      itemCount: _comments.length,
                       itemBuilder: (context, index) {
-                        final comment = comments[index];
+                        final comment = _comments[index];
                         return Container(
                           margin: const EdgeInsets.only(bottom: 20),
                           padding: const EdgeInsets.all(30),
@@ -316,7 +326,7 @@ class _PostDetailPageState extends State<PostDetailPage> {
       bottomNavigationBar: Container(
         width: double.infinity,
         height: 70,
-        padding: const EdgeInsets.symmetric(vertical: 17), // 위아래 여백
+        padding: const EdgeInsets.symmetric(vertical: 17),
         decoration: ShapeDecoration(
           color: Colors.white,
           shape: RoundedRectangleBorder(
@@ -324,16 +334,12 @@ class _PostDetailPageState extends State<PostDetailPage> {
           ),
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.center, // 수평 중앙 정렬
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.account_circle, // 프로필 아이콘 적용
-              size: 28,
-              color: Colors.grey,
-            ),
-            SizedBox(width: 14), // 아이콘과 텍스트 사이 간격
+            Icon(Icons.account_circle, size: 28, color: Colors.grey),
+            SizedBox(width: 14),
             Container(
-              width: 200, // 텍스트 필드 크기 제한
+              width: 200,
               child: TextField(
                 controller: _commentController,
                 decoration: InputDecoration(
@@ -344,33 +350,21 @@ class _PostDetailPageState extends State<PostDetailPage> {
                     borderRadius: BorderRadius.circular(20),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(
-                    vertical: 5, // 힌트가 잘 보이도록 내부 패딩 조정
-                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 5),
                 ),
+                // 엔터키로도 댓글 전송 가능
+                onSubmitted: (value) => _addComment(),
               ),
             ),
-
-            SizedBox(width: 55), // 텍스트 필드와 전송 아이콘 사이 간격
-
+            SizedBox(width: 55),
             Transform.translate(
-              offset: const Offset(0, -5), // X축(-10), Y축(-5) 방향으로 이동 (음수 적용)
+              offset: const Offset(0, -5),
               child: IconButton(
                 icon: Transform.rotate(
-                  angle: -40 * (3.141592 / 180), // 반시계 방향 40도 회전
-                  child: Icon(
-                    Icons.send,
-                    color: Color(0xFFFFAD0A),
-                    size: 26,
-                  ), // 크기 조정 가능
+                  angle: -40 * (3.141592 / 180),
+                  child: Icon(Icons.send, color: Color(0xFFFFAD0A), size: 26),
                 ),
-                onPressed: () {
-                  String comment = _commentController.text.trim();
-                  if (comment.isNotEmpty) {
-                    print("$comment");
-                    _commentController.clear();
-                  }
-                },
+                onPressed: _addComment, // 실제 댓글 추가 함수 호출
               ),
             ),
           ],
