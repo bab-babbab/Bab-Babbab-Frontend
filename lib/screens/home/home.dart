@@ -1,6 +1,6 @@
 import 'package:bab_babbab_front/screens/mypage/mypageChange.dart';
 import 'package:flutter/material.dart';
-
+import 'package:bab_babbab_front/screens/home/environment_news.dart';
 import 'package:bab_babbab_front/widgets/bottom_nav_bar.dart';
 import 'package:bab_babbab_front/screens/ranking/ranking.dart';
 import 'package:bab_babbab_front/screens/home/foodBoardPage.dart';
@@ -42,6 +42,7 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         onPressed: () {},
+        child: const Icon(Icons.add, color: Colors.white),
         elevation: 0,
         backgroundColor: Color(0xffFFAD0A),
         shape: CircleBorder(),
@@ -279,6 +280,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
               color: Colors.white,
               borderRadius: BorderRadius.all(Radius.circular(16)),
             ),
+            child: EnvironmentNews(),
           ),
         ],
       ),
