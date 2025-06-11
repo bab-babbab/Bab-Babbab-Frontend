@@ -66,6 +66,10 @@
 <string>사진 촬영을 위해 카메라 접근이 필요합니다.</string>
 <key>NSPhotoLibraryUsageDescription</key>
 <string>사진 선택을 위해 갤러리 접근이 필요합니다.</string>
-
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+	<string>http</string>
+	<string>https</string>
+	</array>
 	</dict>
 </plist>
