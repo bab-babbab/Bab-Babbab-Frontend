@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
     String userId = 'user-123';
     _pages = [
       _HomeMainContent(userId: userId),
-      PostsPage(),
+      PostsMainPage(),
       RankingPage(),
       MyPage(),
     ];

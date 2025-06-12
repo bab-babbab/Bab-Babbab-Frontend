@@ -1,8 +1,10 @@
+import 'package:bab_babbab_front/screens/posts/post_detail.dart';
+import 'package:bab_babbab_front/screens/posts/posts_page.dart';
+import 'package:bab_babbab_front/widgets/post_detail_widget.dart';
 import 'package:flutter/material.dart';
 
-class PostsPage extends StatelessWidget {
-  const PostsPage({super.key});
-
+class PostsMainPage extends StatelessWidget {
+  const PostsMainPage({super.key});
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,12 +23,10 @@ class PostsPage extends StatelessWidget {
 
 class _PostsMainContent extends StatelessWidget {
   const _PostsMainContent({super.key});
-
   @override
   Widget build(BuildContext context) {
     double screenWidth = MediaQuery.of(context).size.width; 
     double containerWidth = screenWidth - 50;
-
     return Padding(
       padding: const EdgeInsets.only(left: 25, top: 100, right: 25),
       child: Column(
@@ -99,23 +99,37 @@ class _PostsMainContent extends StatelessWidget {
                   fontSize: 20,
                 ),
               ),
-              Row(
-                children: [
-                  Text(
-                    '전체보기',
-                    style: TextStyle(
-                      fontFamily: 'Pretendard',
-                      fontSize: 14,
-                      color: Color(0xffAAAAAA),
+              GestureDetector(
+                onTap: () {
+                  print("전체보기 클릭됨!");
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const PostsPage(),
                     ),
+                  );
+                },
+                child: Container(
+                  padding: EdgeInsets.all(8),
+                  child: Row(
+                    children: [
+                      Text(
+                        '전체보기',
+                        style: TextStyle(
+                          fontFamily: 'Pretendard',
+                          fontSize: 14,
+                          color: Color(0xffAAAAAA),
+                        ),
+                      ),
+                      SizedBox(width: 5),
+                      Icon(
+                        Icons.arrow_forward_ios,
+                        size: 14,
+                        color: Color(0xffAAAAAA),
+                      )
+                    ],
                   ),
-                  SizedBox(width: 5),
-                  Icon(
-                    Icons.arrow_forward_ios,
-                    size: 14,
-                    color: Color(0xffAAAAAA),
-                  )
-                ],
+                ),
               )
             ],
           ),
