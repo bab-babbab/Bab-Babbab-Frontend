@@ -22,13 +22,13 @@ class SelectPage extends StatelessWidget {
               onPressed: () async {
                 final result = await _authService.signInWithGoogle();
                 if (result != null) {
-                  print('로그인 완료: ${result.user?.email}');
+                  final id = result.user?.uid ?? '';
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => InformationPage()),
+                    MaterialPageRoute(
+                      builder: (context) => InformationPage(id: id),
+                    ),
                   );
-                } else {
-                  print('로그인 실패 또는 취소됨');
                 }
               },
               icon: Image.asset(
