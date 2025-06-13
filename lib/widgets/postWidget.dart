@@ -266,7 +266,7 @@ class _PostWidgetState extends State<PostWidget> {
           ),
         ],
       ),
-      child: Container(
+      child: SizedBox(
         height: 150,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

@@ -10,13 +10,6 @@ class PostsMainPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Color(0xffF7F8F9),
       body: const _PostsMainContent(),
-      floatingActionButton: FloatingActionButton(
-        onPressed: (){},
-        child: const Icon(Icons.add, color: Colors.white),
-        elevation: 0,
-        backgroundColor: Color(0xffFFAD0A),
-        shape: CircleBorder(),
-      ),
     );
   }
 }
@@ -25,7 +18,7 @@ class _PostsMainContent extends StatelessWidget {
   const _PostsMainContent({super.key});
   @override
   Widget build(BuildContext context) {
-    double screenWidth = MediaQuery.of(context).size.width; 
+    double screenWidth = MediaQuery.of(context).size.width;
     double containerWidth = screenWidth - 50;
     return Padding(
       padding: const EdgeInsets.only(left: 25, top: 100, right: 25),
@@ -37,14 +30,12 @@ class _PostsMainContent extends StatelessWidget {
             height: 70,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.all(
-                Radius.circular(15),
-              ),
+              borderRadius: BorderRadius.all(Radius.circular(15)),
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 25), 
+              padding: const EdgeInsets.symmetric(horizontal: 25),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween, 
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
                     '내 친구 찾아보기',
@@ -54,10 +45,7 @@ class _PostsMainContent extends StatelessWidget {
                       color: Color(0xffD1D2D1),
                     ),
                   ),
-                  Icon(
-                    Icons.search,
-                    color: Color(0xffAAAAAA),
-                  ),
+                  Icon(Icons.search, color: Color(0xffAAAAAA)),
                 ],
               ),
             ),
@@ -66,14 +54,9 @@ class _PostsMainContent extends StatelessWidget {
             padding: const EdgeInsets.only(top: 40, bottom: 16),
             child: Text(
               '나의 현황',
-              style: TextStyle(
-                fontFamily: 'Pretendard',
-                fontSize: 24,
-                
-              ),
+              style: TextStyle(fontFamily: 'Pretendard', fontSize: 24),
             ),
-          )
-          ,
+          ),
           Column(
             children: [
               Container(
@@ -81,11 +64,9 @@ class _PostsMainContent extends StatelessWidget {
                 height: 160,
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.all(
-                    Radius.circular(15)
-                  ) 
+                  borderRadius: BorderRadius.all(Radius.circular(15)),
                 ),
-              )
+              ),
             ],
           ),
           SizedBox(height: 50),
@@ -94,18 +75,14 @@ class _PostsMainContent extends StatelessWidget {
             children: [
               Text(
                 '게시물',
-                style: TextStyle(
-                  fontFamily: 'Pretendard',
-                  fontSize: 20,
-                ),
+                style: TextStyle(fontFamily: 'Pretendard', fontSize: 20),
               ),
               GestureDetector(
                 onTap: () {
                   print("전체보기 클릭됨!");
-                  Navigator.push(
-                    context,
+                  Navigator.of(context, rootNavigator: true).push(
                     MaterialPageRoute(
-                      builder: (context) => const PostsPage(),
+                      builder: (context) => const PostsListPage(),
                     ),
                   );
                 },
@@ -126,26 +103,22 @@ class _PostsMainContent extends StatelessWidget {
                         Icons.arrow_forward_ios,
                         size: 14,
                         color: Color(0xffAAAAAA),
-                      )
+                      ),
                     ],
                   ),
                 ),
-              )
+              ),
             ],
           ),
-          SizedBox(
-            height: 20,
-          ),
+          SizedBox(height: 20),
           Container(
             width: containerWidth,
             height: 200,
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.all(
-                    Radius.circular(15)
-              ), 
+              borderRadius: BorderRadius.all(Radius.circular(15)),
             ),
-          )
+          ),
         ],
       ),
     );
