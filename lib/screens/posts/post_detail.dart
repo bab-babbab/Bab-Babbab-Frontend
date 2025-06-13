@@ -51,8 +51,8 @@ class _PostsPageState extends State<PostsPage> {
                 userGrade: _getUserGrade(index),
                 statusMessage: _getStatusMessage(index),
                 isTopPost: index == 0, // 첫 번째 게시물만 상단 게시물로 설정
-                maxImages: 2,
-                initialImages: _postImages[index], // 해당 게시물의 이미지 전달
+                imageCount: 2,
+                // initialImages: _postImages[index], // 해당 게시물의 이미지 전달
                 onDetailTap: () {
                   // PostDetailWidget으로 이동하면서 이미지 데이터 전달
                   Navigator.push(
@@ -67,12 +67,12 @@ class _PostsPageState extends State<PostsPage> {
                     ),
                   );
                 },
-                onImagesChanged: (images) {
-                  // PostWidget에서 이미지가 변경될 때 콜백
-                  setState(() {
-                    _postImages[index] = images;
-                  });
-                },
+                // onImagesChanged: (images) {
+                //   // PostWidget에서 이미지가 변경될 때 콜백
+                //   setState(() {
+                //     _postImages[index] = images;
+                //   });
+                // },
               );
             },
           ),

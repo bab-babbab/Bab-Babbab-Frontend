@@ -3,7 +3,7 @@ import 'package:bab_babbab_front/widgets/postWidget.dart';
 import 'package:bab_babbab_front/widgets/post_detail_widget.dart'; // PostDetailWidget import로 변경
 import 'dart:io';
 
-// PostsListPage 위젯 (이름 변경으로 중복 방지)
+// PostsListPage 위젯
 class PostsListPage extends StatefulWidget {
   const PostsListPage({super.key});
 
@@ -51,10 +51,9 @@ class _PostsListPageState extends State<PostsListPage> {
                 userGrade: _getUserGrade(index),
                 statusMessage: _getStatusMessage(index),
                 isTopPost: index == 0, // 첫 번째 게시물만 상단 게시물로 설정
-                maxImages: 2,
-                initialImages: _postImages[index], // 해당 게시물의 이미지 전달
+                imageCount: _getImageCount(index), // ✅ 각 게시물마다 다른 개수
                 onDetailTap: () {
-                  // PostDetailWidget으로 이동하면서 이미지 데이터 전달
+                  // PostDetailWidget으로 이동하면서 이미지 개수 전달
                   Navigator.push(
                     context,
                     MaterialPageRoute(
@@ -63,15 +62,12 @@ class _PostsListPageState extends State<PostsListPage> {
                             selectedImages:
                                 _postImages[index], // 해당 게시물의 이미지 전달
                             postData: _getPostData(index), // 게시물 데이터도 전달
+                            greyContainerCount: _getImageCount(
+                              index,
+                            ), // ✅ 회색 컨테이너 개수 전달
                           ),
                     ),
                   );
-                },
-                onImagesChanged: (images) {
-                  // PostWidget에서 이미지가 변경될 때 콜백
-                  setState(() {
-                    _postImages[index] = images;
-                  });
                 },
               );
             },
@@ -79,6 +75,12 @@ class _PostsListPageState extends State<PostsListPage> {
         ),
       ),
     );
+  }
+
+  // 임의의 이미지 개수 반환 (1~3개)
+  int _getImageCount(int index) {
+    final imageCounts = [3, 1, 2, 1]; // 각 게시물마다 다른 이미지 개수
+    return imageCounts[index % imageCounts.length];
   }
 
   // 게시물 데이터를 Map으로 전달 (PostDetailWidget에서 사용할 추가 정보)

@@ -20,8 +20,14 @@ class Comment {
 class PostDetailWidget extends StatefulWidget {
   final List<File>? selectedImages;
   final Map<String, dynamic>? postData;
+  final int greyContainerCount; // 회색 컨테이너 개수 추가
 
-  const PostDetailWidget({super.key, this.selectedImages, this.postData});
+  const PostDetailWidget({
+    super.key,
+    this.selectedImages,
+    this.postData,
+    this.greyContainerCount = 3, // 기본값 3개
+  });
 
   @override
   PostDetailWidgetState createState() => PostDetailWidgetState();
@@ -116,24 +122,9 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
         widget.selectedImages != null && widget.selectedImages!.isNotEmpty;
 
     if (hasRealImages) {
-      // 이미지가 있을 때: 회색 박스 + 실제 이미지들 (스와이프 가능)
-
-      // 첫 번째: 무조건 기본 회색 박스
-      imageWidgets.add(
-        Container(
-          decoration: BoxDecoration(
-            color: Color(0xFFC4C4C4),
-            borderRadius: BorderRadius.circular(10),
-          ),
-          child: Center(
-            child: Icon(Icons.image, size: 60, color: Colors.white),
-          ),
-        ),
-      );
-
-      // 실제 이미지들 추가 (최대 2개까지)
+      // 이미지가 있을 때: 실제 이미지들만 표시 (최대 3개까지)
       int imagesToAdd =
-          widget.selectedImages!.length > 2 ? 2 : widget.selectedImages!.length;
+          widget.selectedImages!.length > 3 ? 3 : widget.selectedImages!.length;
 
       for (int i = 0; i < imagesToAdd; i++) {
         imageWidgets.add(
@@ -167,18 +158,34 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
         );
       }
     } else {
-      // 이미지가 아무것도 없을 때: 회색 박스 1개만 (스와이프 불가)
-      imageWidgets.add(
-        Container(
-          decoration: BoxDecoration(
-            color: Color(0xFFC4C4C4),
-            borderRadius: BorderRadius.circular(10),
+      // 이미지가 없을 때: PostWidget에서 전달받은 개수만큼 회색 박스 생성 (스와이프 가능)
+      for (int i = 0; i < widget.greyContainerCount; i++) {
+        imageWidgets.add(
+          Container(
+            decoration: BoxDecoration(
+              color: Color(0xFFC4C4C4),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.image, size: 60, color: Colors.white),
+                  SizedBox(height: 8),
+                  Text(
+                    '${i + 1}',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
-          child: Center(
-            child: Icon(Icons.image, size: 60, color: Colors.white),
-          ),
-        ),
-      );
+        );
+      }
     }
 
     return Scaffold(
@@ -472,8 +479,8 @@ class _PostsPageState extends State<PostsPage> {
                 userGrade: _getUserGrade(index),
                 statusMessage: _getStatusMessage(index),
                 isTopPost: index == 0, // 첫 번째 게시물만 상단 게시물로 설정
-                maxImages: 2,
-                initialImages: _postImages[index], // 해당 게시물의 이미지 전달
+                imageCount: 2,
+                // initialImages: _postImages[index], // 해당 게시물의 이미지 전달
                 onDetailTap: () {
                   // PostDetailWidget으로 이동하면서 이미지 데이터 전달
                   Navigator.push(
@@ -488,12 +495,12 @@ class _PostsPageState extends State<PostsPage> {
                     ),
                   );
                 },
-                onImagesChanged: (images) {
-                  // PostWidget에서 이미지가 변경될 때 콜백
-                  setState(() {
-                    _postImages[index] = images;
-                  });
-                },
+                // onImagesChanged: (images) {
+                //   // PostWidget에서 이미지가 변경될 때 콜백
+                //   setState(() {
+                //     _postImages[index] = images;
+                //   });
+                // },
               );
             },
           ),
