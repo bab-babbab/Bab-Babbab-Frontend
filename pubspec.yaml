@@ -23,6 +23,7 @@ dependencies:
   dotted_border: ^2.1.0
   aws_s3_upload: ^1.4.1
   url_launcher: ^6.3.1
+  provider: ^6.1.5
 
 dev_dependencies:
   flutter_test:
