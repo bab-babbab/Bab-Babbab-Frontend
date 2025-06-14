@@ -6,6 +6,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:http_parser/http_parser.dart';
+import 'package:provider/provider.dart';
+import 'package:bab_babbab_front/models/user_model.dart';
 
 class InformationPage extends StatefulWidget {
   final String id;
@@ -121,7 +123,7 @@ class _InformationPageState extends State<InformationPage> {
                       ),
                     ),
                   )
-                else 
+                else
                   Container(
                     width: _imageSize,
                     height: _imageSize,
@@ -240,9 +242,7 @@ class _InformationPageState extends State<InformationPage> {
     final String name = nameController.text;
     final String message = messageController.text;
 
-    final uri = Uri.parse(
-      'http://localhost:3000/user/user-info',
-    );
+    final uri = Uri.parse('http://localhost:3000/user/user-info');
     var request =
         http.MultipartRequest('POST', uri)
           ..fields['id'] = widget.id
@@ -261,9 +261,16 @@ class _InformationPageState extends State<InformationPage> {
     try {
       final response = await request.send();
       if (response.statusCode == 200 || response.statusCode == 201) {
+        Provider.of<UserModel>(
+          context,
+          listen: false,
+        ).setUser(id: widget.id, name: name, message: message, school: '');
+
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => InformationStuPage()),
+          MaterialPageRoute(
+            builder: (context) => InformationStuPage(id: widget.id, name: name),
+          ),
         );
       } else {
         if (kDebugMode) {

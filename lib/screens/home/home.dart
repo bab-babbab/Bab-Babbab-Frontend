@@ -6,6 +6,8 @@ import 'package:bab_babbab_front/screens/home/foodBoardPage.dart';
 import 'package:bab_babbab_front/screens/posts/postsPage.dart';
 import 'package:bab_babbab_front/screens/mypage/mypage.dart';
 import 'package:http/http.dart' as http;
+import 'package:provider/provider.dart';
+import 'package:bab_babbab_front/models/user_model.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -73,6 +75,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserModel>(context);
     double screenWidth = MediaQuery.of(context).size.width;
     double containerWidth = screenWidth - 50;
 
@@ -82,7 +85,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            '정수진님\n오늘도 수고 했어요!',
+            '${user.name}님\n오늘도 수고 했어요!',
             style: TextStyle(fontFamily: 'Pretendard', fontSize: 24),
           ),
           SizedBox(height: 28),
@@ -243,7 +246,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
             ),
             child: Center(
               child: Text(
-                '음식을 먹을만큼만 담자~',
+                '${user.message}',
                 style: TextStyle(
                   fontFamily: 'Pretendard',
                   fontSize: 18,
