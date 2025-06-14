@@ -261,7 +261,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
             ),
             child: Center(
               child: Text(
-                '음식을 먹을만큼만 담자~',
+                '${user.message}',
                 style: TextStyle(
                   fontFamily: 'Pretendard',
                   fontSize: 18,

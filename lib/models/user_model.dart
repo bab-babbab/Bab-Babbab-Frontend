@@ -8,7 +8,7 @@ class UserModel extends ChangeNotifier {
 
   String get id => _id;
   String get name => _name;
-  String get statusMessage => _message;
+  String get message => _message;
   String get school => _school;
 
   void setUser({

@@ -129,7 +129,7 @@ class _InformationStuPage extends State<InformationStuPage> {
       userProvider.setUser(
         id: userProvider.id,
         name: userProvider.name,
-        message: userProvider.statusMessage,
+        message: userProvider.message,
         school: _schoolController.text.trim(),
       );
 
