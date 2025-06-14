@@ -1,3 +1,4 @@
+import 'package:bab_babbab_front/screens/posts/create_post.dart';
 import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/screens/home/environment_news.dart';
 import 'package:bab_babbab_front/widgets/bottom_nav_bar.dart';
@@ -52,7 +53,12 @@ class _HomePageState extends State<HomePage> {
         onTap: (i) => setState(() => _selectedIndex = i),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ImageUploadScreen()),
+          );
+        },
         child: const Icon(Icons.add, color: Colors.white),
         elevation: 0,
         backgroundColor: Color(0xffFFAD0A),
@@ -61,7 +67,6 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
-
 
 class _HomeMainContent extends StatefulWidget {
   final VoidCallback onGoToRanking;
