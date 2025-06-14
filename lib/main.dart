@@ -1,13 +1,13 @@
 import 'package:bab_babbab_front/screens/home/home.dart';
 import 'package:bab_babbab_front/screens/information/InfoPage.dart';
 import 'package:bab_babbab_front/screens/information/selectPage.dart';
+import 'package:bab_babbab_front/screens/posts/create_post.dart';
 import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'models/user_model.dart';
-
 
 void main() async {
   await dotenv.load(fileName: "assets/config/.env");
@@ -20,9 +20,7 @@ void main() async {
   }
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => UserModel()),
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => UserModel())],
       child: MainApp(),
     ),
   );
@@ -42,7 +40,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'bab-babbab',
 
-      home:SelectPage(),
+      home: ImageUploadScreen(),
     );
   }
 }
