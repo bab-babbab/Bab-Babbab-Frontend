@@ -17,18 +17,36 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  final pages = [
-    _HomeMainContent(userId: 'user-123'),
-    PostsMainPage(),
-    RankingPage(),
-    MyPage(),
-  ];
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      _HomeMainContent(
+        onGoToRanking: () {
+          setState(() {
+            _selectedIndex = 2;
+          });
+        },
+      ),
+      PostsPage(),
+      RankingPage(),
+      MyPage(),
+    ];
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF7F8F9),
-      body: pages[_selectedIndex],
+      body: _pages[_selectedIndex],
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _selectedIndex,
         onTap: (i) => setState(() => _selectedIndex = i),
@@ -44,29 +62,37 @@ class _HomePageState extends State<HomePage> {
   }
 }
 
-class _HomeMainContent extends StatefulWidget {
-  final String userId;
-  const _HomeMainContent({super.key, required this.userId});
 
+class _HomeMainContent extends StatefulWidget {
+  final VoidCallback onGoToRanking;
+
+  const _HomeMainContent({super.key, required this.onGoToRanking});
   @override
   State<_HomeMainContent> createState() => _HomeMainContentState();
 }
 
 class _HomeMainContentState extends State<_HomeMainContent> {
   late Future<int> streakCount;
+  late String userId;
+  bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    streakCount = fetchStreakCount();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final user = Provider.of<UserModel>(context);
+      userId = user.id; // 상태관리에서 user.id 추출
+      streakCount = fetchStreakCount(userId); // 연속일수 요청
+      _initialized = true;
+    }
   }
 
-  Future<int> fetchStreakCount() async {
+  Future<int> fetchStreakCount(String id) async {
     final response = await http.get(
-      Uri.parse('http://localhost:3000/stats/sequence/${widget.userId}'),
+      Uri.parse('http://localhost:3000/stats/sequence/$id'),
     );
 
-    if (response.statusCode == 200) {
+    if (response.statusCode == 200 || response.statusCode == 201) {
       return int.parse(response.body);
     } else {
       throw Exception('연속 일수 가져오기 실패함');
@@ -202,7 +228,11 @@ class _HomeMainContentState extends State<_HomeMainContent> {
                     borderRadius: BorderRadius.circular(16),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
-                      onTap: () {},
+                      onTap: () {
+                        if (widget.onGoToRanking != null) {
+                          widget.onGoToRanking!();
+                        }
+                      },
                       child: Container(
                         width: containerWidth / 2 - 7,
                         height: 96,
