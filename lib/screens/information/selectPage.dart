@@ -26,7 +26,10 @@ class SelectPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => InformationPage(id: id),
+                      builder:
+                          (context) => InformationPage(
+                            id: id,
+                          ),
                     ),
                   );
                 }

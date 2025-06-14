@@ -263,7 +263,7 @@ class _InformationPageState extends State<InformationPage> {
       if (response.statusCode == 200 || response.statusCode == 201) {
         Navigator.push(
           context,
-          MaterialPageRoute(builder: (context) => InformationStuPage()),
+          MaterialPageRoute(builder: (context) => InformationStuPage(id: widget.id, name: name)),
         );
       } else {
         if (kDebugMode) {
