@@ -1,4 +1,4 @@
-import 'package:bab_babbab_front/screens/mypage/mypageChange.dart';
+import 'package:bab_babbab_front/screens/posts/create_post.dart';
 import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/screens/home/environment_news.dart';
 import 'package:bab_babbab_front/widgets/bottom_nav_bar.dart';
@@ -11,14 +11,13 @@ import 'package:provider/provider.dart';
 import 'package:bab_babbab_front/models/user_model.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
   @override
   _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
+
   late List<Widget> _pages;
 
   @override
@@ -47,18 +46,23 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xffF7F8F9),
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: CustomBottomNav(
+        currentIndex: _selectedIndex,
+        onTap: (i) => setState(() => _selectedIndex = i),
+      ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ImageUploadScreen()),
+          );
+        },
         child: const Icon(Icons.add, color: Colors.white),
         elevation: 0,
         backgroundColor: Color(0xffFFAD0A),
         shape: CircleBorder(),
-      ),
-      backgroundColor: Color(0xffF7F8F9),
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
       ),
     );
   }

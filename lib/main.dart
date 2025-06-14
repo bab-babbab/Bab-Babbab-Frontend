@@ -1,6 +1,7 @@
 import 'package:bab_babbab_front/screens/home/home.dart';
 import 'package:bab_babbab_front/screens/information/InfoPage.dart';
 import 'package:bab_babbab_front/screens/information/selectPage.dart';
+import 'package:bab_babbab_front/screens/posts/create_post.dart';
 import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
