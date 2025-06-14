@@ -37,22 +37,27 @@ class MealService {
         'https://open.neis.go.kr/hub/mealServiceDietInfo?KEY=$_mealApiKey&Type=json&ATPT_OFCDC_SC_CODE=$eduOfficeCode&SD_SCHUL_CODE=$schoolCode&MLSV_YMD=$date';
 
     final response = await http.get(Uri.parse(url));
+
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
 
-      final rows = data['mealServiceDietInfo'][1]['row'];
-      if (rows == null || rows.isEmpty) {
-        throw Exception('해당 날짜의 급식 정보가 없습니다.');
-      }
+      final infoList = data['mealServiceDietInfo'];
+      if (infoList == null || infoList.length < 2) return [];
 
-      return rows.map<Map<String, String>>((row) => {
-        'mealType': row['MMEAL_SC_NM'].toString(),
-        'meal': row['DDISH_NM'].toString().replaceAll('<br/>', ', '),
-        'calories': row['CAL_INFO'].toString(),
-      }).toList();
+      final rows = infoList[1]['row'];
+      if (rows == null || rows.isEmpty) return [];
 
+      return rows
+          .map<Map<String, String>>(
+            (row) => {
+              'mealType': row['MMEAL_SC_NM'].toString(),
+              'meal': row['DDISH_NM'].toString().replaceAll('<br/>', ', '),
+              'calories': row['CAL_INFO'].toString(),
+            },
+          )
+          .toList();
     } else {
-      throw Exception('급식 정보를 불러올 수 없습니다');
+      return [];
     }
   }
 }

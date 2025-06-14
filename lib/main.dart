@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+import 'models/user_model.dart';
+
 
 void main() async {
   await dotenv.load(fileName: "assets/config/.env");
@@ -15,7 +18,14 @@ void main() async {
       options: DefaultFirebaseOptions.currentPlatform,
     );
   }
-  runApp(MainApp());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserModel()),
+      ],
+      child: MainApp(),
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
