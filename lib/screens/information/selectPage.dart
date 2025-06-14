@@ -25,7 +25,12 @@ class SelectPage extends StatelessWidget {
                   print('로그인 완료: ${result.user?.email}');
                   Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => InformationPage()),
+                    MaterialPageRoute(
+                      builder:
+                          (context) => InformationPage(
+                            id: result.user!.uid,
+                          ),
+                    ),
                   );
                 } else {
                   print('로그인 실패 또는 취소됨');

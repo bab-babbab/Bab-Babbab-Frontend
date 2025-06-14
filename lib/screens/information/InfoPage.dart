@@ -1,12 +1,16 @@
 import 'dart:io';
-
 import 'package:bab_babbab_front/screens/information/InfoStuPage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:http_parser/http_parser.dart';
 
 class InformationPage extends StatefulWidget {
-  const InformationPage({Key? key}) : super(key: key);
+  final String id;
+
+  const InformationPage({Key? key, required this.id}) : super(key: key);
 
   @override
   _InformationPageState createState() => _InformationPageState();
@@ -15,6 +19,8 @@ class InformationPage extends StatefulWidget {
 class _InformationPageState extends State<InformationPage> {
   final picker = ImagePicker();
   XFile? _pickedFile; // 카메라로 촬영한 이미지를 저장할 변수
+  TextEditingController nameController = TextEditingController();
+  TextEditingController messageController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -35,9 +41,9 @@ class _InformationPageState extends State<InformationPage> {
                 fontSize: 24,
               ),
             ),
-
             SizedBox(height: 30),
             TextField(
+              controller: nameController,
               decoration: InputDecoration(
                 hintText: '이름을 입력해주세요.',
                 fillColor: Color(0xffF8F8F8),
@@ -54,6 +60,7 @@ class _InformationPageState extends State<InformationPage> {
             ),
             SizedBox(height: 30),
             TextField(
+              controller: messageController,
               decoration: InputDecoration(
                 hintText: '상태메세지를 입력해주세요.',
                 fillColor: Color(0xffF8F8F8),
@@ -71,7 +78,7 @@ class _InformationPageState extends State<InformationPage> {
             SizedBox(height: 30),
             Column(
               children: [
-                if (_pickedFile == null) // 이미지 파일을 선택하지 않았을 때
+                if (_pickedFile == null)
                   Container(
                     constraints: BoxConstraints(
                       minHeight: _imageSize,
@@ -84,24 +91,19 @@ class _InformationPageState extends State<InformationPage> {
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          // 큰 원 (배경)
                           Container(
                             width: 100,
                             height: 100,
                             decoration: const BoxDecoration(
-                              color: Color(0xFFFFF3E0), // 연한 오렌지색 배경
+                              color: Color(0xFFFFF3E0),
                               shape: BoxShape.circle,
                             ),
                           ),
-
-                          // 가운데 이미지 아이콘
                           const Icon(
-                            Icons.image, // 또는 Icons.image_outlined
+                            Icons.image,
                             size: 30,
-                            color: Color(0xFFFFB300), // 진한 오렌지
+                            color: Color(0xFFFFB300),
                           ),
-
-                          // 오른쪽 아래에 + 버튼
                           Positioned(
                             bottom: 3,
                             right: 3,
@@ -109,7 +111,7 @@ class _InformationPageState extends State<InformationPage> {
                               width: 30,
                               height: 30,
                               decoration: const BoxDecoration(
-                                color: Color(0xFFFFB300), // 진한 오렌지
+                                color: Color(0xFFFFB300),
                                 shape: BoxShape.circle,
                               ),
                               child: const Icon(Icons.add, color: Colors.white),
@@ -119,7 +121,7 @@ class _InformationPageState extends State<InformationPage> {
                       ),
                     ),
                   )
-                else // 이미지 선택했을 떄
+                else 
                   Container(
                     width: _imageSize,
                     height: _imageSize,
@@ -133,7 +135,6 @@ class _InformationPageState extends State<InformationPage> {
                     child: Stack(
                       alignment: Alignment.center,
                       children: [
-                        // 오른쪽 아래에 + 버튼
                         Positioned(
                           bottom: 3,
                           right: 3,
@@ -141,7 +142,7 @@ class _InformationPageState extends State<InformationPage> {
                             width: 30,
                             height: 30,
                             decoration: const BoxDecoration(
-                              color: Color(0xFFFFB300), // 진한 오렌지
+                              color: Color(0xFFFFB300),
                               shape: BoxShape.circle,
                             ),
                             child: const Icon(Icons.add, color: Colors.white),
@@ -170,10 +171,7 @@ class _InformationPageState extends State<InformationPage> {
                 ),
               ),
               onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => InformationStuPage()),
-                );
+                _submitUserInfo();
               },
             ),
           ],
@@ -234,6 +232,47 @@ class _InformationPageState extends State<InformationPage> {
     } else {
       if (kDebugMode) {
         print('이미지 선택안함');
+      }
+    }
+  }
+
+  Future<void> _submitUserInfo() async {
+    final String name = nameController.text;
+    final String message = messageController.text;
+
+    final uri = Uri.parse(
+      'http://localhost:3000/user/user-info',
+    );
+    var request =
+        http.MultipartRequest('POST', uri)
+          ..fields['id'] = widget.id
+          ..fields['name'] = name
+          ..fields['message'] = message;
+
+    if (_pickedFile != null) {
+      var file = await http.MultipartFile.fromPath(
+        'profile', // 서버에서 이 파일을 받을 때 사용할 필드 이름
+        _pickedFile!.path,
+        contentType: MediaType('image', 'jpeg'),
+      );
+      request.files.add(file);
+    }
+
+    try {
+      final response = await request.send();
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => InformationStuPage(id: widget.id, name: name)),
+        );
+      } else {
+        if (kDebugMode) {
+          print('Failed to submit user info: ${response.statusCode}');
+        }
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error occurred: $e');
       }
     }
   }

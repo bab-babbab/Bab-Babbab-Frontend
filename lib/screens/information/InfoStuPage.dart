@@ -5,8 +5,35 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:dropdown_button2/dropdown_button2.dart';
 
+class SchoolInfoDto {
+  final String id;
+  final String schoolName;
+  final int grade;
+  final int classNumber;
+
+  SchoolInfoDto({
+    required this.id,
+    required this.schoolName,
+    required this.grade,
+    required this.classNumber,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'school_name': schoolName,
+      'grade': grade,
+      'class': classNumber,
+    };
+  }
+}
+
 class InformationStuPage extends StatefulWidget {
-  const InformationStuPage({super.key});
+  final String id;
+  final String name; // 이름 추가
+
+  const InformationStuPage({Key? key, required this.id, required this.name}) : super(key: key);
+
   @override
   State<InformationStuPage> createState() => _InformationStuPage();
 }
@@ -16,8 +43,8 @@ class _InformationStuPage extends State<InformationStuPage> {
   String? selectedGrade;
   String? selectedClass;
   List<String> availableClasses = [];
-  List<String> classList = []; // 반 리스트 정의
-  List<String> gradeList = ['1', '2', '3']; // 학년 리스트 정의
+  List<String> classList = [];
+  List<String> gradeList = ['1', '2', '3'];
   bool isLoading = false;
 
   Future<void> fetchClasses() async {
@@ -46,10 +73,9 @@ class _InformationStuPage extends State<InformationStuPage> {
     final officeCode = school['ATPT_OFCDC_SC_CODE'];
 
     final isMiddle = schoolName.endsWith("중학교");
-    final endpoint =
-        isMiddle
-            ? 'https://open.neis.go.kr/hub/misTimetable'
-            : 'https://open.neis.go.kr/hub/hisTimetable';
+    final endpoint = isMiddle
+        ? 'https://open.neis.go.kr/hub/misTimetable'
+        : 'https://open.neis.go.kr/hub/hisTimetable';
 
     final grade = selectedGrade ?? "1";
     final timetableUrl =
@@ -66,10 +92,8 @@ class _InformationStuPage extends State<InformationStuPage> {
         if (row['CLASS_NM'] != null) classSet.add(row['CLASS_NM']);
       }
       setState(() {
-        availableClasses =
-            classSet.toList()..sort(
-              (a, b) => int.parse(a).compareTo(int.parse(b)),
-            ); // 숫자 기준 정렬
+        availableClasses = classSet.toList()
+          ..sort((a, b) => int.parse(a).compareTo(int.parse(b)));
       });
     }
 
@@ -78,9 +102,33 @@ class _InformationStuPage extends State<InformationStuPage> {
     });
   }
 
-  Future<List<String>> fetchClassListForGrade(String grade) async {
-    await fetchClasses(); // 기존 함수 사용해서 class 리스트 업데이트
-    return availableClasses;
+  Future<void> submitSchoolInfo() async {
+    final dto = SchoolInfoDto(
+      id: widget.id,
+      schoolName: _schoolController.text.trim(),
+      grade: int.parse(selectedGrade!),
+      classNumber: int.parse(selectedClass!),
+    );
+
+    final uri = Uri.parse('http://localhost:3000/user/school-info');
+    final headers = {'Content-Type': 'application/json'};
+
+    final res = await http.post(
+      uri,
+      headers: headers,
+      body: jsonEncode(dto.toJson()),
+    );
+
+    if (res.statusCode == 200 || res.statusCode == 201) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => HomePage()),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('학교 정보를 저장하는 데 실패했어요.')),
+      );
+    }
   }
 
   bool get isFormValid =>
@@ -98,19 +146,18 @@ class _InformationStuPage extends State<InformationStuPage> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 100),
-            const Text(
-              "이름님의 학교\n정보를 작성해주세요.",
-              style: TextStyle(
+            Text(
+              "${widget.name}님의 학교\n정보를 작성해주세요.",
+              style: const TextStyle(
                 fontFamily: 'Pretendard',
                 fontWeight: FontWeight.bold,
                 fontSize: 24,
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             TextField(
               controller: _schoolController,
               onChanged: (_) {
-                // 초기화
                 setState(() {
                   selectedGrade = null;
                   selectedClass = null;
@@ -118,7 +165,7 @@ class _InformationStuPage extends State<InformationStuPage> {
                   classList = [];
                 });
               },
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 fillColor: Color(0xffF8F8F8),
                 filled: true,
                 hintText: '학교를 입력해주세요. 예) 서울고등학교',
@@ -132,13 +179,13 @@ class _InformationStuPage extends State<InformationStuPage> {
                 ),
               ),
             ),
-            SizedBox(height: 30),
+            const SizedBox(height: 30),
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 DropdownButton2<String>(
                   value: selectedGrade,
-                  hint: Text(
+                  hint: const Text(
                     '학년 선택',
                     style: TextStyle(fontSize: 18, fontFamily: 'Pretendard'),
                   ),
@@ -152,29 +199,26 @@ class _InformationStuPage extends State<InformationStuPage> {
                     });
 
                     if (value != null) {
-                      final fetchedClasses = await fetchClassListForGrade(
-                        value,
-                      );
+                      final fetchedClasses = await fetchClasses();
                       setState(() {
-                        classList = fetchedClasses;
+                        classList = availableClasses;
                       });
                     }
                   },
-                  items:
-                      gradeList.map((item) {
-                        return DropdownMenuItem<String>(
-                          value: item,
-                          child: Center(
-                            child: Text(
-                              item,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontFamily: 'Pretendard',
-                              ),
-                            ),
+                  items: gradeList.map((item) {
+                    return DropdownMenuItem<String>(
+                      value: item,
+                      child: Center(
+                        child: Text(
+                          item,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontFamily: 'Pretendard',
                           ),
-                        );
-                      }).toList(),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                   buttonStyleData: ButtonStyleData(
                     height: 60,
                     width: 150,
@@ -198,7 +242,7 @@ class _InformationStuPage extends State<InformationStuPage> {
                 const SizedBox(width: 30),
                 DropdownButton2<String>(
                   value: selectedClass,
-                  hint: Text(
+                  hint: const Text(
                     '반 선택',
                     style: TextStyle(fontSize: 18, fontFamily: 'Pretendard'),
                   ),
@@ -209,21 +253,20 @@ class _InformationStuPage extends State<InformationStuPage> {
                       selectedClass = value;
                     });
                   },
-                  items:
-                      classList.map((item) {
-                        return DropdownMenuItem<String>(
-                          value: item,
-                          child: Center(
-                            child: Text(
-                              item,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontFamily: 'Pretendard',
-                              ),
-                            ),
+                  items: classList.map((item) {
+                    return DropdownMenuItem<String>(
+                      value: item,
+                      child: Center(
+                        child: Text(
+                          item,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontFamily: 'Pretendard',
                           ),
-                        );
-                      }).toList(),
+                        ),
+                      ),
+                    );
+                  }).toList(),
                   buttonStyleData: ButtonStyleData(
                     height: 60,
                     width: 150,
@@ -256,12 +299,11 @@ class _InformationStuPage extends State<InformationStuPage> {
                 ),
               ),
               onPressed: () {
-                if (selectedGrade != null && selectedClass != null) {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => HomePage(), // 실제 페이지로 교체
-                    ),
+                if (isFormValid) {
+                  submitSchoolInfo();
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('모든 항목을 선택해주세요.')),
                   );
                 }
               },
