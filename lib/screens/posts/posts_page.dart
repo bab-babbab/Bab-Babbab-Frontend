@@ -7,7 +7,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'dart:io';
 
-// PostsListPage 위젯
+// PostsPage 위젯 (실제 API 연동)
 class PostsListPage extends StatefulWidget {
   const PostsListPage({super.key});
 
@@ -28,7 +28,7 @@ class _PostsListPageState extends State<PostsListPage> {
     _fetchPosts();
   }
 
-  // API에서 게시물 목록을 가져오는 함수
+  // 🔥 실제 API에서 게시물 목록을 가져오는 함수
   Future<void> _fetchPosts() async {
     try {
       setState(() {
@@ -99,7 +99,33 @@ class _PostsListPageState extends State<PostsListPage> {
     }
   }
 
-  // 이미지 개수를 계산하는 함수
+  // 🔥 user_id로 사용자 정보를 가져오는 함수
+  Future<Map<String, String>> _getUserInfo(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/home/user/$userId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final userInfo = responseData['userInfo'];
+        final schoolInfo = responseData['schoolInfo'];
+
+        String name = userInfo['name'] ?? '사용자';
+        String grade = schoolInfo['grade']?.toString() ?? '0';
+        String classNum = schoolInfo['class']?.toString() ?? '0';
+
+        return {'name': name, 'grade': grade, 'class': classNum};
+      }
+    } catch (e) {
+      print('❌ 사용자 정보 가져오기 오류: $e');
+    }
+
+    return {'name': '사용자', 'grade': '0', 'class': '0'};
+  }
+
+  // 🔥 이미지 개수를 계산하는 함수
   int _getImageCount(Map<String, dynamic> post) {
     int count = 0;
     if (post['photo_b'] != null && post['photo_b'].toString().isNotEmpty)
@@ -111,17 +137,16 @@ class _PostsListPageState extends State<PostsListPage> {
     return count;
   }
 
-  // 이미지 URL 리스트를 반환하는 함수
+  // 🔥 이미지 URL 리스트를 반환하는 함수
   List<String> _getImageUrls(Map<String, dynamic> post) {
     List<String> imageUrls = [];
 
-    // 🔥 이미 완전한 URL로 오는 경우와 파일명만 오는 경우 모두 처리
     if (post['photo_b'] != null && post['photo_b'].toString().isNotEmpty) {
       String photoB = post['photo_b'].toString();
       if (photoB.startsWith('http')) {
-        imageUrls.add(photoB); // 이미 완전한 URL
+        imageUrls.add(photoB);
       } else {
-        imageUrls.add('$baseUrl/uploads/$photoB'); // 파일명만 있는 경우
+        imageUrls.add('$baseUrl/uploads/$photoB');
       }
     }
 
@@ -146,64 +171,26 @@ class _PostsListPageState extends State<PostsListPage> {
     return imageUrls;
   }
 
-  // 🔥 user_id로 사용자 정보를 가져오는 함수 (올바른 API 엔드포인트)
-  Future<Map<String, String>> _getUserInfo(String userId) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/home/user/$userId'), // 🔥 올바른 API 엔드포인트
-        headers: {'Content-Type': 'application/json'},
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-
-        // 🔥 응답 구조에 맞게 데이터 추출
-        final userInfo = responseData['userInfo'];
-        final schoolInfo = responseData['schoolInfo'];
-
-        String name = userInfo['name'] ?? '사용자';
-        String grade = schoolInfo['grade']?.toString() ?? '0';
-        String classNum = schoolInfo['class']?.toString() ?? '0';
-
-        print('✅ 사용자 정보 가져오기 성공: $name (${grade}학년/${classNum}반)');
-
-        return {'name': name, 'grade': grade, 'class': classNum};
-      } else {
-        print('❌ 사용자 정보 API 호출 실패 for $userId: ${response.statusCode}');
-        print('응답: ${response.body}');
-      }
-    } catch (e) {
-      print('❌ 사용자 정보 가져오기 오류 for $userId: $e');
-    }
-
-    // 🔥 실패시 기본값 반환
-    return {'name': '사용자', 'grade': '0', 'class': '0'};
-  }
-
-  // 게시물 작성자 정보를 반환하는 함수
+  // 🔥 게시물 작성자 정보를 반환하는 함수
   String _getPostUserName(Map<String, dynamic> post) {
     final userModel = Provider.of<UserModel>(context, listen: false);
 
-    // 게시물의 user_id가 현재 로그인한 사용자와 같으면 현재 사용자 이름 사용
     if (post['user_id'] == userModel.id) {
       return userModel.name.isNotEmpty ? userModel.name : '나';
     }
 
-    // 🔥 다른 사용자의 경우 캐시된 정보가 있으면 사용, 없으면 기본값
     String cachedName = post['_cached_user_name'] ?? '사용자';
     return cachedName;
   }
 
-  // 게시물 작성자 학년/반 정보를 반환하는 함수
+  // 🔥 게시물 작성자 학년/반 정보를 반환하는 함수
   String _getPostUserGrade(Map<String, dynamic> post) {
     final userModel = Provider.of<UserModel>(context, listen: false);
 
-    // 게시물의 user_id가 현재 로그인한 사용자와 같으면 현재 사용자 학년/반 사용
     if (post['user_id'] == userModel.id) {
       return userModel.gradeClass;
     }
 
-    // 🔥 다른 사용자의 경우 캐시된 정보가 있으면 사용, 없으면 기본값
     String? cachedGrade = post['_cached_user_grade'];
     String? cachedClass = post['_cached_user_class'];
 
@@ -217,7 +204,7 @@ class _PostsListPageState extends State<PostsListPage> {
     return '학년/반 정보 없음';
   }
 
-  // 새로고침 함수
+  // 🔥 새로고침 함수
   Future<void> _refreshPosts() async {
     await _fetchPosts();
   }
@@ -325,20 +312,15 @@ class _PostsListPageState extends State<PostsListPage> {
                   MaterialPageRoute(
                     builder:
                         (context) => PostDetailWidget(
-                          selectedImages:
-                              null, // 실제 이미지는 PostDetailWidget에서 URL로 처리
+                          selectedImages: null, // 로컬 이미지는 사용 안 함
                           postData: {
                             'userName': _getPostUserName(post),
                             'userGrade': _getPostUserGrade(post),
                             'statusMessage': post['comment'] ?? '내용이 없습니다.',
                             'timestamp': post['created_at'] ?? '시간 정보 없음',
-                            'photo_b': post['photo_b'],
-                            'photo_l': post['photo_l'],
-                            'photo_d': post['photo_d'],
-                            'imageUrls': _getImageUrls(
-                              post,
-                            ), // 🔥 이미지 URL 리스트 추가
+                            'imageUrls': _getImageUrls(post),
                           },
+                          postId: post['id'], // 🔥 실제 게시물 ID 전달 (API 호출용)
                           greyContainerCount: _getImageCount(post),
                         ),
                   ),

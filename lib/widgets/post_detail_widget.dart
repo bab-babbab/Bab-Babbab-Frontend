@@ -35,11 +35,9 @@ class Comment {
 
 // 댓글 API 서비스
 class CommentService {
-  // 🔥🔥🔥 실제 서버 URL로 변경하세요! 예: 'https://your-actual-server.com'
-  static const String baseUrl = 'https://your-api-server.com';
+  static const String baseUrl = 'http://localhost:3000'; // 🔥 실제 서버 URL
 
-  // 🔥🔥🔥 댓글 작성 API - POST /posts/:id/replys
-  // 요청 형식: { "user_id": "cnYXVjOqQ0RVQsA8OKB9TYWveJI3", "reply": "와..맛있겠다" }
+  // 🔥 댓글 작성 API - POST /posts/:id/replys
   static Future<bool> addComment({
     required String postId,
     required String userId,
@@ -47,10 +45,7 @@ class CommentService {
   }) async {
     try {
       final url = '$baseUrl/posts/$postId/replys';
-      final requestData = {
-        'user_id': userId, // 예: "cnYXVjOqQ0RVQsA8OKB9TYWveJI3"
-        'reply': reply, // 예: "와..맛있겠다"
-      };
+      final requestData = {'user_id': userId, 'reply': reply};
 
       print('🔥 댓글 작성 API 호출');
       print('🔥 URL: $url');
@@ -68,7 +63,6 @@ class CommentService {
       print('📡 서버 응답 코드: ${response.statusCode}');
       print('📡 응답 내용: ${response.body}');
 
-      // 성공 상태 코드 확인 (200, 201 모두 성공)
       if (response.statusCode == 200 || response.statusCode == 201) {
         print('✅ 댓글 작성 성공!');
         return true;
@@ -93,10 +87,35 @@ class CommentService {
       );
 
       print('댓글 목록 응답: ${response.statusCode}');
+      print('댓글 목록 응답 내용: ${response.body}');
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = jsonDecode(response.body);
-        return jsonList.map((json) => Comment.fromJson(json)).toList();
+        List<Comment> comments = [];
+
+        // 🔥 각 댓글에 대해 사용자 정보를 가져와서 Comment 객체 생성
+        for (var commentJson in jsonList) {
+          String userId = commentJson['user_id'] ?? '';
+          String reply = commentJson['reply'] ?? '';
+          String timestamp = commentJson['created_at'] ?? '';
+
+          // 🔥 사용자 정보 가져오기
+          Map<String, String> userInfo = await PostDetailService.getUserInfo(
+            userId,
+          );
+
+          Comment comment = Comment(
+            userId: userId,
+            userName: userInfo['name']!,
+            userClass: '${userInfo['grade']}학년/${userInfo['class']}반',
+            timestamp: _formatTimestamp(timestamp), // 🔥 시간 포맷팅
+            content: reply,
+          );
+
+          comments.add(comment);
+        }
+
+        return comments;
       }
       return [];
     } catch (e) {
@@ -104,11 +123,93 @@ class CommentService {
       return [];
     }
   }
+
+  // 🔥 시간 포맷팅 함수 추가
+  static String _formatTimestamp(String isoString) {
+    try {
+      DateTime dateTime = DateTime.parse(isoString);
+      DateTime now = DateTime.now();
+
+      // 한국 시간으로 변환 (UTC+9)
+      dateTime = dateTime.add(Duration(hours: 9));
+
+      String year = dateTime.year.toString();
+      String month = dateTime.month.toString().padLeft(2, '0');
+      String day = dateTime.day.toString().padLeft(2, '0');
+
+      int hour = dateTime.hour;
+      String period = hour >= 12 ? '오후' : '오전';
+      hour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
+      String minute = dateTime.minute.toString().padLeft(2, '0');
+
+      return '$year.$month.$day $period $hour:$minute';
+    } catch (e) {
+      print('시간 포맷팅 오류: $e');
+      return '시간 정보 없음';
+    }
+  }
+}
+
+// 🔥 게시물 상세 API 서비스
+class PostDetailService {
+  static const String baseUrl = 'http://localhost:3000';
+
+  // GET "/posts/:id" - 게시물 상세 조회
+  static Future<Map<String, dynamic>?> getPostDetail(String postId) async {
+    try {
+      print('🔍 게시물 상세 조회: postId=$postId');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/posts/$postId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      print('📡 게시물 상세 응답: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final postData = jsonDecode(response.body);
+        print('✅ 게시물 상세 조회 성공!');
+        return postData;
+      } else {
+        print('❌ 게시물 상세 조회 실패: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      print('❌ 게시물 상세 조회 오류: $e');
+      return null;
+    }
+  }
+
+  // 🔥 user_id로 사용자 정보 가져오기
+  static Future<Map<String, String>> getUserInfo(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/home/user/$userId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final userInfo = responseData['userInfo'];
+        final schoolInfo = responseData['schoolInfo'];
+
+        String name = userInfo['name'] ?? '사용자';
+        String grade = schoolInfo['grade']?.toString() ?? '0';
+        String classNum = schoolInfo['class']?.toString() ?? '0';
+
+        return {'name': name, 'grade': grade, 'class': classNum};
+      }
+    } catch (e) {
+      print('❌ 사용자 정보 가져오기 오류: $e');
+    }
+
+    return {'name': '사용자', 'grade': '0', 'class': '0'};
+  }
 }
 
 // 게시물 상세 위젯
 class PostDetailWidget extends StatefulWidget {
-  final List<File>? selectedImages; // 게시물 이미지들
+  final List<File>? selectedImages; // 게시물 이미지들 (로컬)
   final Map<String, dynamic>? postData; // 게시물 데이터
   final int greyContainerCount; // 회색 박스 개수
   final String? postId; // 🔥 게시물 ID (API 호출용)
@@ -118,7 +219,7 @@ class PostDetailWidget extends StatefulWidget {
     this.selectedImages,
     this.postData,
     this.greyContainerCount = 3,
-    this.postId, // API 연동을 위한 postId 추가
+    this.postId,
   });
 
   @override
@@ -134,17 +235,92 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
   int _currentImageIndex = 0;
   List<Comment> _comments = [];
   bool _isLoading = false;
+  bool _isLoadingPost = true;
+
+  // 🔥 게시물 상세 정보
+  Map<String, dynamic>? _postDetail;
+  List<String> _imageUrls = [];
+  String _postUserName = '';
+  String _postUserGrade = '';
 
   @override
   void initState() {
     super.initState();
+    _loadPostDetail(); // 🔥 게시물 상세 정보 로드
     _loadComments(); // 댓글 불러오기
+  }
+
+  // 🔥 게시물 상세 정보 로드
+  Future<void> _loadPostDetail() async {
+    if (widget.postId != null) {
+      setState(() => _isLoadingPost = true);
+
+      // 게시물 상세 정보 가져오기
+      final postDetail = await PostDetailService.getPostDetail(widget.postId!);
+
+      if (postDetail != null) {
+        setState(() {
+          _postDetail = postDetail;
+        });
+
+        // 이미지 URL 추출
+        _extractImageUrls(postDetail);
+
+        // 사용자 정보 가져오기
+        await _loadUserInfo(postDetail['user_id']);
+      }
+
+      setState(() => _isLoadingPost = false);
+    } else {
+      setState(() => _isLoadingPost = false);
+    }
+  }
+
+  // 🔥 이미지 URL 추출
+  void _extractImageUrls(Map<String, dynamic> postDetail) {
+    List<String> urls = [];
+
+    if (postDetail['photo_b'] != null &&
+        postDetail['photo_b'].toString().isNotEmpty) {
+      urls.add(postDetail['photo_b'].toString());
+    }
+    if (postDetail['photo_l'] != null &&
+        postDetail['photo_l'].toString().isNotEmpty) {
+      urls.add(postDetail['photo_l'].toString());
+    }
+    if (postDetail['photo_d'] != null &&
+        postDetail['photo_d'].toString().isNotEmpty) {
+      urls.add(postDetail['photo_d'].toString());
+    }
+
+    setState(() {
+      _imageUrls = urls;
+    });
+  }
+
+  // 🔥 사용자 정보 로드
+  Future<void> _loadUserInfo(String userId) async {
+    final userModel = Provider.of<UserModel>(context, listen: false);
+
+    if (userId == userModel.id) {
+      // 현재 로그인한 사용자
+      setState(() {
+        _postUserName = userModel.name;
+        _postUserGrade = userModel.gradeClass;
+      });
+    } else {
+      // 다른 사용자 정보 가져오기
+      final userInfo = await PostDetailService.getUserInfo(userId);
+      setState(() {
+        _postUserName = userInfo['name']!;
+        _postUserGrade = '${userInfo['grade']}학년/${userInfo['class']}반';
+      });
+    }
   }
 
   // 댓글 불러오기 함수
   Future<void> _loadComments() async {
     if (widget.postId != null) {
-      // 🔥 실제 API 호출
       setState(() => _isLoading = true);
 
       final comments = await CommentService.getComments(widget.postId!);
@@ -153,37 +329,24 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
         _isLoading = false;
       });
     } else {
-      // 🔥 샘플 댓글 (postId가 없을 때)
+      // 샘플 댓글 (postId가 없을 때만)
       _comments = [
         Comment(
           userId: "sample_user_1",
           userName: "김수지",
-          userClass: "2학년/3반", // 🔥 학년/반 형식으로 변경
+          userClass: "2학년/3반",
           timestamp: "2024.02.01 오후 8:43",
           content: "오늘도 수고 많았습니다!! 선배 존경합니다!",
         ),
         Comment(
           userId: "sample_user_2",
           userName: "박지훈",
-          userClass: "2학년/1반", // 🔥 학년/반 형식으로 변경
+          userClass: "2학년/1반",
           timestamp: "2024.02.01 오후 8:45",
           content: "정말 열심히 하시네요! 항상 응원합니다!",
         ),
-        Comment(
-          userId: "sample_user_3",
-          userName: "양혜원",
-          userClass: "3학년/2반", // 🔥 학년/반 형식으로 변경
-          timestamp: "2024.02.15 오후 18:45",
-          content: "너 정말 열심히 한다. 힘내.",
-        ),
-        Comment(
-          userId: "sample_user_4",
-          userName: "김지혜",
-          userClass: "2학년/1반", // 🔥 학년/반 형식으로 변경
-          timestamp: "2024.08.21 오후 8:21",
-          content: "상미의 생일에 이러한 것을 실천 하다니 정말 좋아",
-        ),
       ];
+      setState(() => _isLoading = false);
     }
   }
 
@@ -202,15 +365,13 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
     return "${now.year}.${now.month.toString().padLeft(2, '0')}.${now.day.toString().padLeft(2, '0')} $period $hour:$minute";
   }
 
-  // 🔥🔥🔥 댓글 작성 함수 (UserModel 사용, 학년/반 표시)
+  // 🔥 댓글 작성 함수
   Future<void> _addComment() async {
     String commentText = _commentController.text.trim();
     if (commentText.isEmpty) return;
 
-    // 🔥 UserModel에서 사용자 정보 가져오기
     final userModel = Provider.of<UserModel>(context, listen: false);
 
-    // 🔥 로그인 확인
     if (userModel.id.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -226,27 +387,22 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
     bool success = false;
 
     if (widget.postId != null) {
-      // 🔥 서버에 댓글 저장 (UserModel의 id 사용)
       success = await CommentService.addComment(
         postId: widget.postId!,
-        userId: userModel.id, // 🔥 UserModel에서 가져온 사용자 ID
+        userId: userModel.id,
         reply: commentText,
       );
     } else {
-      // 테스트용 (항상 성공)
-      await Future.delayed(Duration(milliseconds: 500)); // 로딩 시뮬레이션
+      await Future.delayed(Duration(milliseconds: 500));
       success = true;
     }
 
     if (success) {
-      // 🔥 성공시 로컬 리스트에 추가 (UserModel 정보 사용, 학년/반 표시)
+      // 🔥 현재 사용자 정보로 댓글 생성 (UserModel 사용)
       final newComment = Comment(
-        userId: userModel.id, // 🔥 UserModel ID
-        userName:
-            userModel.name.isNotEmpty
-                ? userModel.name
-                : "사용자", // 🔥 UserModel 이름
-        userClass: userModel.gradeClass, // 🔥 학교 대신 학년/반 사용
+        userId: userModel.id,
+        userName: userModel.name.isNotEmpty ? userModel.name : "사용자",
+        userClass: userModel.gradeClass, // 🔥 "3학년/2반" 형태로 표시
         timestamp: _getCurrentTimestamp(),
         content: commentText,
       );
@@ -258,7 +414,6 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
 
       _commentController.clear();
 
-      // 성공 메시지
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -268,7 +423,6 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
         );
       }
     } else {
-      // 실패 처리
       setState(() => _isLoading = false);
 
       if (mounted) {
@@ -291,22 +445,95 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // 🔥 UserModel 가져오기
     final userModel = Provider.of<UserModel>(context);
 
-    // 🔥 게시물 데이터 추출
-    final userName = widget.postData?['userName'] ?? '정수진';
-    final userGrade = widget.postData?['userGrade'] ?? '3학년 / 2반';
-    final statusMessage = widget.postData?['statusMessage'] ?? '오늘 인증!';
-    final timestamp = widget.postData?['timestamp'] ?? '2024.02.01 오후 8:43';
+    // 🔥 게시물 데이터 (API에서 가져온 데이터 우선 사용)
+    final userName =
+        _postUserName.isNotEmpty
+            ? _postUserName
+            : (widget.postData?['userName'] ?? '정수진');
+    final userGrade =
+        _postUserGrade.isNotEmpty
+            ? _postUserGrade
+            : (widget.postData?['userGrade'] ?? '3학년 / 2반');
+    final statusMessage =
+        _postDetail?['comment'] ??
+        widget.postData?['statusMessage'] ??
+        '오늘 인증!';
+    final timestamp =
+        _postDetail?['created_at'] ??
+        widget.postData?['timestamp'] ??
+        '2024.02.01 오후 8:43';
 
-    // 🔥 이미지 위젯 생성
+    // 🔥 이미지 위젯 생성 (서버 이미지 우선, 그 다음 로컬 이미지)
     List<Widget> imageWidgets = [];
-    bool hasRealImages =
-        widget.selectedImages != null && widget.selectedImages!.isNotEmpty;
 
-    if (hasRealImages) {
-      // 실제 이미지 표시
+    if (_imageUrls.isNotEmpty) {
+      // 🔥 서버 이미지 (스와이프 가능)
+      for (int i = 0; i < _imageUrls.length; i++) {
+        imageWidgets.add(
+          Container(
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                _imageUrls[i],
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Color(0xFFE0E0E0),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        value:
+                            loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                        strokeWidth: 2,
+                        color: Color(0xFFFFB800),
+                      ),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Color(0xFFC4C4C4),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.broken_image,
+                            size: 60,
+                            color: Colors.white,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            '이미지 로딩 실패',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+    } else if (widget.selectedImages != null &&
+        widget.selectedImages!.isNotEmpty) {
+      // 🔥 로컬 이미지 (스와이프 가능)
       int imagesToAdd =
           widget.selectedImages!.length > 3 ? 3 : widget.selectedImages!.length;
       for (int i = 0; i < imagesToAdd; i++) {
@@ -341,7 +568,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
         );
       }
     } else {
-      // 회색 박스 표시
+      // 🔥 회색 박스 (스와이프 가능)
       for (int i = 0; i < widget.greyContainerCount; i++) {
         imageWidgets.add(
           Container(
@@ -373,8 +600,6 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
 
     return Scaffold(
       backgroundColor: Colors.white,
-
-      // 🔥 앱바
       appBar: AppBar(
         title: Text(
           "게시물",
@@ -394,17 +619,18 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-
-      // 🔥 메인 바디
       body:
-          _isLoading && _comments.isEmpty
+          _isLoadingPost
               ? Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CircularProgressIndicator(color: Color(0xFFFFAD0A)),
                     SizedBox(height: 16),
-                    Text('댓글을 불러오는 중...', style: TextStyle(color: Colors.grey)),
+                    Text(
+                      '게시물을 불러오는 중...',
+                      style: TextStyle(color: Colors.grey),
+                    ),
                   ],
                 ),
               )
@@ -420,6 +646,28 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            // 🔥 사용자 정보
+                            Row(
+                              children: [
+                                Text(
+                                  '$userName ',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF333333),
+                                  ),
+                                ),
+                                Text(
+                                  userGrade,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF999999),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 12),
+
                             // 🔥 게시물 제목
                             Text(
                               statusMessage,
@@ -430,7 +678,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                             ),
                             SizedBox(height: 20),
 
-                            // 🔥 이미지 슬라이더
+                            // 🔥 이미지 슬라이더 (스와이프 가능)
                             Container(
                               width: double.infinity,
                               height: 350,
@@ -451,7 +699,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                                     itemBuilder:
                                         (context, index) => imageWidgets[index],
                                   ),
-                                  // 이미지 카운터
+                                  // 🔥 이미지 카운터 (여러 이미지가 있을 때만 표시)
                                   if (imageWidgets.length > 1)
                                     Positioned(
                                       bottom: 8,
@@ -504,7 +752,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                             ),
                             SizedBox(height: 14),
 
-                            // 🔥 댓글 리스트 (모든 댓글 동일한 스타일)
+                            // 🔥 댓글 리스트
                             ListView.builder(
                               shrinkWrap: true,
                               physics: NeverScrollableScrollPhysics(),
@@ -513,13 +761,10 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                                 final comment = _comments[index];
 
                                 return Container(
-                                  // 🔥 기존과 동일한 마진
                                   margin: EdgeInsets.only(bottom: 20),
-                                  // 🔥 기존과 동일한 패딩
                                   padding: EdgeInsets.all(30),
-                                  // 🔥 모든 댓글 동일한 흰색 배경
                                   decoration: BoxDecoration(
-                                    color: Colors.white, // 🔥 모든 댓글이 흰색 배경
+                                    color: Colors.white,
                                     borderRadius: BorderRadius.circular(10),
                                     boxShadow: [
                                       BoxShadow(
@@ -534,12 +779,10 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      // 🔥 댓글 헤더 (내 댓글 태그 제거)
                                       Row(
                                         mainAxisAlignment:
                                             MainAxisAlignment.spaceBetween,
                                         children: [
-                                          // 왼쪽: 사용자 이름만 (내 댓글 태그 제거)
                                           Text(
                                             comment.userName,
                                             style: TextStyle(
@@ -547,7 +790,6 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                                               color: Color(0xFF6F6F6F),
                                             ),
                                           ),
-                                          // 가운데: 사용자 클래스 (학년/반)
                                           Text(
                                             comment.userClass,
                                             style: TextStyle(
@@ -555,7 +797,6 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                                               color: Color(0xFFAAAAAA),
                                             ),
                                           ),
-                                          // 오른쪽: 시간
                                           SizedBox(width: 30),
                                           Text(
                                             comment.timestamp,
@@ -567,9 +808,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                                           ),
                                         ],
                                       ),
-                                      // 🔥 기존과 동일한 간격
                                       SizedBox(height: 20),
-                                      // 🔥 댓글 내용 (기존과 동일한 스타일)
                                       Text(
                                         comment.content,
                                         style: TextStyle(
@@ -589,8 +828,6 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                   ),
                 ),
               ),
-
-      // 🔥 댓글 입력 바
       bottomNavigationBar: Container(
         width: double.infinity,
         height: 70,
