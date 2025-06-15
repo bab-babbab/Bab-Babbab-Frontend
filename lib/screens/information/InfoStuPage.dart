@@ -107,6 +107,7 @@ class _InformationStuPage extends State<InformationStuPage> {
     });
   }
 
+  // 🔥🔥🔥 학교 정보 제출 (학년/반 정보 UserModel에 저장)
   Future<void> submitSchoolInfo() async {
     final dto = SchoolInfoDto(
       id: widget.id,
@@ -126,13 +127,31 @@ class _InformationStuPage extends State<InformationStuPage> {
 
     if (res.statusCode == 200 || res.statusCode == 201) {
       final userProvider = Provider.of<UserModel>(context, listen: false);
+
+      // 🔥🔥🔥 학년/반 정보도 함께 UserModel에 저장
       userProvider.setUser(
-        id: userProvider.id,
-        name: userProvider.name,
-        message: userProvider.message,
-        school: _schoolController.text.trim(),
+        id: widget.id, // 🔥 현재 사용자 ID
+        name: widget.name, // 🔥 현재 사용자 이름
+        message:
+            userProvider.message.isNotEmpty
+                ? userProvider.message
+                : "안녕하세요!", // 🔥 기존 메시지 유지 또는 기본값
+        school: _schoolController.text.trim(), // 🔥 선택한 학교
+        grade: selectedGrade!, // 🔥 선택한 학년 ("1", "2", "3")
+        class_: selectedClass!, // 🔥 선택한 반 ("1", "2", "3", ...)
       );
 
+      // 🔥 저장된 정보 확인용 로그
+      print('🎉 UserModel 저장 완료!');
+      print('📋 사용자 정보:');
+      print('  - ID: ${userProvider.id}');
+      print('  - 이름: ${userProvider.name}');
+      print('  - 학교: ${userProvider.school}');
+      print('  - 학년: ${userProvider.grade}');
+      print('  - 반: ${userProvider.class_}');
+      print('  - 학년/반 조합: ${userProvider.gradeClass}'); // "3학년/4반" 형식
+
+      // 홈페이지로 이동
       Navigator.push(
         context,
         MaterialPageRoute(builder: (context) => HomePage()),
@@ -196,6 +215,7 @@ class _InformationStuPage extends State<InformationStuPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
+                // 🔥 학년 선택 드롭다운
                 DropdownButton2<String>(
                   value: selectedGrade,
                   hint: const Text(
@@ -254,6 +274,7 @@ class _InformationStuPage extends State<InformationStuPage> {
                   ),
                 ),
                 const SizedBox(width: 30),
+                // 🔥 반 선택 드롭다운
                 DropdownButton2<String>(
                   value: selectedClass,
                   hint: const Text(
