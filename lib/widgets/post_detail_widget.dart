@@ -124,28 +124,22 @@ class CommentService {
     }
   }
 
-  // 🔥 시간 포맷팅 함수 추가
+  // 🔥 댓글 시간 포맷팅 함수 수정 (날짜만 표시)
   static String _formatTimestamp(String isoString) {
     try {
       DateTime dateTime = DateTime.parse(isoString);
-      DateTime now = DateTime.now();
 
-      // 한국 시간으로 변환 (UTC+9)
-      dateTime = dateTime.add(Duration(hours: 9));
+      // 🔥 UTC 시간을 로컬 시간으로 변환
+      dateTime = dateTime.toLocal();
 
       String year = dateTime.year.toString();
       String month = dateTime.month.toString().padLeft(2, '0');
       String day = dateTime.day.toString().padLeft(2, '0');
 
-      int hour = dateTime.hour;
-      String period = hour >= 12 ? '오후' : '오전';
-      hour = hour > 12 ? hour - 12 : (hour == 0 ? 12 : hour);
-      String minute = dateTime.minute.toString().padLeft(2, '0');
-
-      return '$year.$month.$day $period $hour:$minute';
+      return '$year-$month-$day'; // 🔥 날짜만 반환 (YYYY-MM-DD 형식)
     } catch (e) {
       print('시간 포맷팅 오류: $e');
-      return '시간 정보 없음';
+      return '날짜 정보 없음';
     }
   }
 }
@@ -298,7 +292,25 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
     });
   }
 
-  // 🔥 사용자 정보 로드
+  // 🔥 게시물 타임스탬프 포맷팅 함수 수정 (날짜만 YYYY-MM-DD 형식)
+  String _formatPostTimestamp(String isoString) {
+    try {
+      DateTime dateTime = DateTime.parse(isoString);
+
+      // 🔥 UTC 시간을 로컬 시간으로 변환
+      dateTime = dateTime.toLocal();
+
+      String year = dateTime.year.toString();
+      String month = dateTime.month.toString().padLeft(2, '0');
+      String day = dateTime.day.toString().padLeft(2, '0');
+
+      return '$year-$month-$day'; // 🔥 YYYY-MM-DD 형태로만 반환
+    } catch (e) {
+      print('게시물 시간 포맷팅 오류: $e');
+      return '날짜 정보 없음';
+    }
+  }
+
   Future<void> _loadUserInfo(String userId) async {
     final userModel = Provider.of<UserModel>(context, listen: false);
 
@@ -335,14 +347,14 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
           userId: "sample_user_1",
           userName: "김수지",
           userClass: "2학년/3반",
-          timestamp: "2024.02.01 오후 8:43",
+          timestamp: "2024-02-01",
           content: "오늘도 수고 많았습니다!! 선배 존경합니다!",
         ),
         Comment(
           userId: "sample_user_2",
           userName: "박지훈",
           userClass: "2학년/1반",
-          timestamp: "2024.02.01 오후 8:45",
+          timestamp: "2024-02-01",
           content: "정말 열심히 하시네요! 항상 응원합니다!",
         ),
       ];
@@ -350,19 +362,15 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
     }
   }
 
-  // 현재 시간 포맷팅
+  // 🔥 댓글 작성 시 현재 날짜 포맷팅 (날짜만)
   String _getCurrentTimestamp() {
-    final now = DateTime.now();
-    final hour =
-        now.hour > 12
-            ? now.hour - 12
-            : now.hour == 0
-            ? 12
-            : now.hour;
-    final period = now.hour >= 12 ? '오후' : '오전';
-    final minute = now.minute.toString().padLeft(2, '0');
+    final now = DateTime.now(); // 🔥 이미 로컬 시간
 
-    return "${now.year}.${now.month.toString().padLeft(2, '0')}.${now.day.toString().padLeft(2, '0')} $period $hour:$minute";
+    String year = now.year.toString();
+    String month = now.month.toString().padLeft(2, '0');
+    String day = now.day.toString().padLeft(2, '0');
+
+    return '$year-$month-$day'; // 🔥 날짜만 반환 (YYYY-MM-DD 형식)
   }
 
   // 🔥 댓글 작성 함수
@@ -392,47 +400,61 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
         userId: userModel.id,
         reply: commentText,
       );
+
+      // 🔥 댓글 작성 성공 시 댓글 목록 다시 불러오기 (서버 시간으로 통일)
+      if (success) {
+        await _loadComments(); // 서버에서 최신 댓글 목록을 다시 가져옴
+        _commentController.clear();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('댓글이 작성되었습니다! 🎉'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
     } else {
+      // 🔥 오프라인 모드 (샘플 데이터)
       await Future.delayed(Duration(milliseconds: 500));
       success = true;
+
+      if (success) {
+        final newComment = Comment(
+          userId: userModel.id,
+          userName: userModel.name.isNotEmpty ? userModel.name : "사용자",
+          userClass: userModel.gradeClass,
+          timestamp: _getCurrentTimestamp(),
+          content: commentText,
+        );
+
+        setState(() {
+          _comments.add(newComment);
+        });
+
+        _commentController.clear();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('댓글이 작성되었습니다! 🎉'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
     }
 
-    if (success) {
-      // 🔥 현재 사용자 정보로 댓글 생성 (UserModel 사용)
-      final newComment = Comment(
-        userId: userModel.id,
-        userName: userModel.name.isNotEmpty ? userModel.name : "사용자",
-        userClass: userModel.gradeClass, // 🔥 "3학년/2반" 형태로 표시
-        timestamp: _getCurrentTimestamp(),
-        content: commentText,
+    setState(() => _isLoading = false);
+
+    if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('댓글 작성에 실패했습니다. 다시 시도해주세요. 😞'),
+          backgroundColor: Colors.red,
+        ),
       );
-
-      setState(() {
-        _comments.add(newComment);
-        _isLoading = false;
-      });
-
-      _commentController.clear();
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('댓글이 작성되었습니다! 🎉'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } else {
-      setState(() => _isLoading = false);
-
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('댓글 작성에 실패했습니다. 다시 시도해주세요. 😞'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
     }
   }
 
@@ -460,10 +482,12 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
         _postDetail?['comment'] ??
         widget.postData?['statusMessage'] ??
         '오늘 인증!';
+
+    // 🔥 게시물 날짜만 표시 (YYYY-MM-DD 형식)
     final timestamp =
-        _postDetail?['created_at'] ??
-        widget.postData?['timestamp'] ??
-        '2024.02.01 오후 8:43';
+        _postDetail?['created_at'] != null
+            ? _formatPostTimestamp(_postDetail!['created_at'])
+            : (widget.postData?['timestamp'] ?? '2024-02-01');
 
     // 🔥 이미지 위젯 생성 (서버 이미지 우선, 그 다음 로컬 이미지)
     List<Widget> imageWidgets = [];
@@ -730,7 +754,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                             ),
                             SizedBox(height: 20),
 
-                            // 🔥 타임스탬프
+                            // 🔥 타임스탬프 (날짜만 표시)
                             Text(
                               timestamp,
                               style: TextStyle(color: Colors.grey),
