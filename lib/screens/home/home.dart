@@ -6,7 +6,6 @@ import 'package:bab_babbab_front/screens/ranking/ranking.dart';
 import 'package:bab_babbab_front/screens/home/foodBoardPage.dart';
 import 'package:bab_babbab_front/screens/posts/postsPage.dart';
 import 'package:bab_babbab_front/screens/mypage/mypage.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:bab_babbab_front/models/user_model.dart';
 import 'package:bab_babbab_front/service/api_service.dart';
@@ -224,7 +223,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
                       borderRadius: BorderRadius.circular(16),
                       onTap: () {
                         if (widget.onGoToRanking != null) {
-                          widget.onGoToRanking!();
+                          widget.onGoToRanking();
                         }
                       },
                       child: Container(

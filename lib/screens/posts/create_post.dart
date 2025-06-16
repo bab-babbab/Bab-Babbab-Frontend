@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dotted_border/dotted_border.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:bab_babbab_front/models/user_model.dart';
 import 'package:bab_babbab_front/service/api_service.dart';
@@ -36,7 +35,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
         });
       }
     } catch (e) {
-      print('이미지 선택 오류: $e');
+      debugPrint('이미지 선택 오류: $e');
       _showErrorDialog('이미지를 선택하는 중 오류가 발생했습니다.');
     }
   }
@@ -189,11 +188,11 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
     });
 
     try {
-      print('업로드 시작 - 사용자 ID: ${userModel.id}');
-      print('댓글: ${_commentController.text.trim()}');
-      print('이미지 1: ${pickedImage1?.path}');
-      print('이미지 2: ${pickedImage2?.path}');
-      print('이미지 3: ${pickedImage3?.path}');
+      debugPrint('업로드 시작 - 사용자 ID: ${userModel.id}');
+      debugPrint('댓글: ${_commentController.text.trim()}');
+      debugPrint('이미지 1: ${pickedImage1?.path}');
+      debugPrint('이미지 2: ${pickedImage2?.path}');
+      debugPrint('이미지 3: ${pickedImage3?.path}');
 
       final response = await ApiService.uploadPost(
         userId: userModel.id,
@@ -203,8 +202,8 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
         image3: pickedImage3,
       );
 
-      print('서버 응답 상태 코드: ${response.statusCode}');
-      print('서버 응답 내용: ${response.body}');
+      debugPrint('서버 응답 상태 코드: ${response.statusCode}');
+      debugPrint('서버 응답 내용: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         _showSuccessDialog();
@@ -216,7 +215,7 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
             errorMessage += '\n${errorData['message']}';
           }
         } catch (jsonError) {
-          print('JSON 파싱 오류: $jsonError');
+          debugPrint('JSON 파싱 오류: $jsonError');
           errorMessage += '\nStatus: ${response.statusCode}';
         }
         _showErrorDialog(errorMessage);

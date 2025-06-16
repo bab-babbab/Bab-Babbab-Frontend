@@ -172,7 +172,7 @@ class _MypageChangeState extends State<MypageChange> {
                       context,
                       MaterialPageRoute(builder: (context) => MyPage()),
                     );
-                    print('상태 메시지 변경');
+                    debugPrint('상태 메시지 변경');
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFFFFB800),
@@ -251,7 +251,7 @@ class _MypageChangeState extends State<MypageChange> {
       });
     } else {
       if (kDebugMode) {
-        print('이미지 선택안함');
+        debugPrint('이미지 선택안함');
       }
     }
   }

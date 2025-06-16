@@ -47,9 +47,9 @@ class CommentService {
       final url = '$baseUrl/posts/$postId/replys';
       final requestData = {'user_id': userId, 'reply': reply};
 
-      print('🔥 댓글 작성 API 호출');
-      print('🔥 URL: $url');
-      print('🔥 요청 데이터: ${jsonEncode(requestData)}');
+      debugPrint('🔥 댓글 작성 API 호출');
+      debugPrint('🔥 URL: $url');
+      debugPrint('🔥 요청 데이터: ${jsonEncode(requestData)}');
 
       final response = await http.post(
         Uri.parse(url),
@@ -60,18 +60,18 @@ class CommentService {
         body: jsonEncode(requestData),
       );
 
-      print('📡 서버 응답 코드: ${response.statusCode}');
-      print('📡 응답 내용: ${response.body}');
+      debugPrint('📡 서버 응답 코드: ${response.statusCode}');
+      debugPrint('📡 응답 내용: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('✅ 댓글 작성 성공!');
+        debugPrint('✅ 댓글 작성 성공!');
         return true;
       } else {
-        print('❌ 댓글 작성 실패 - 상태 코드: ${response.statusCode}');
+        debugPrint('❌ 댓글 작성 실패 - 상태 코드: ${response.statusCode}');
         return false;
       }
     } catch (e) {
-      print('❌ 댓글 작성 네트워크 오류: $e');
+      debugPrint('❌ 댓글 작성 네트워크 오류: $e');
       return false;
     }
   }
@@ -79,15 +79,15 @@ class CommentService {
   // 댓글 목록 가져오기 API
   static Future<List<Comment>> getComments(String postId) async {
     try {
-      print('댓글 목록 요청: postId=$postId');
+      debugPrint('댓글 목록 요청: postId=$postId');
 
       final response = await http.get(
         Uri.parse('$baseUrl/posts/$postId/replys'),
         headers: {'Content-Type': 'application/json'},
       );
 
-      print('댓글 목록 응답: ${response.statusCode}');
-      print('댓글 목록 응답 내용: ${response.body}');
+      debugPrint('댓글 목록 응답: ${response.statusCode}');
+      debugPrint('댓글 목록 응답 내용: ${response.body}');
 
       if (response.statusCode == 200) {
         final List<dynamic> jsonList = jsonDecode(response.body);
@@ -119,7 +119,7 @@ class CommentService {
       }
       return [];
     } catch (e) {
-      print('댓글 불러오기 오류: $e');
+      debugPrint('댓글 불러오기 오류: $e');
       return [];
     }
   }
@@ -138,7 +138,7 @@ class CommentService {
 
       return '$year-$month-$day'; // 🔥 날짜만 반환 (YYYY-MM-DD 형식)
     } catch (e) {
-      print('시간 포맷팅 오류: $e');
+      debugPrint('시간 포맷팅 오류: $e');
       return '날짜 정보 없음';
     }
   }
@@ -151,25 +151,25 @@ class PostDetailService {
   // GET "/posts/:id" - 게시물 상세 조회
   static Future<Map<String, dynamic>?> getPostDetail(String postId) async {
     try {
-      print('🔍 게시물 상세 조회: postId=$postId');
+      debugPrint('🔍 게시물 상세 조회: postId=$postId');
 
       final response = await http.get(
         Uri.parse('$baseUrl/posts/$postId'),
         headers: {'Content-Type': 'application/json'},
       );
 
-      print('📡 게시물 상세 응답: ${response.statusCode}');
+      debugPrint('📡 게시물 상세 응답: ${response.statusCode}');
 
       if (response.statusCode == 200) {
         final postData = jsonDecode(response.body);
-        print('✅ 게시물 상세 조회 성공!');
+        debugPrint('✅ 게시물 상세 조회 성공!');
         return postData;
       } else {
-        print('❌ 게시물 상세 조회 실패: ${response.statusCode}');
+        debugPrint('❌ 게시물 상세 조회 실패: ${response.statusCode}');
         return null;
       }
     } catch (e) {
-      print('❌ 게시물 상세 조회 오류: $e');
+      debugPrint('❌ 게시물 상세 조회 오류: $e');
       return null;
     }
   }
@@ -194,7 +194,7 @@ class PostDetailService {
         return {'name': name, 'grade': grade, 'class': classNum};
       }
     } catch (e) {
-      print('❌ 사용자 정보 가져오기 오류: $e');
+      debugPrint('❌ 사용자 정보 가져오기 오류: $e');
     }
 
     return {'name': '사용자', 'grade': '0', 'class': '0'};
@@ -306,7 +306,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
 
       return '$year-$month-$day'; // 🔥 YYYY-MM-DD 형태로만 반환
     } catch (e) {
-      print('게시물 시간 포맷팅 오류: $e');
+      debugPrint('게시물 시간 포맷팅 오류: $e');
       return '날짜 정보 없음';
     }
   }

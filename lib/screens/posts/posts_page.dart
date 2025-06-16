@@ -40,7 +40,9 @@ class _PostsListPageState extends State<PostsListPage> {
         Map<String, dynamic> postWithUserInfo = Map<String, dynamic>.from(post);
 
         if (post['user_id'] != userModel.id) {
-          Map<String, String> userInfo = await ApiService.getUserInfoSimple(post['user_id']);
+          Map<String, String> userInfo = await ApiService.getUserInfoSimple(
+            post['user_id'],
+          );
           postWithUserInfo['_cached_user_name'] = userInfo['name'];
           postWithUserInfo['_cached_user_grade'] = userInfo['grade'];
           postWithUserInfo['_cached_user_class'] = userInfo['class'];
@@ -54,12 +56,13 @@ class _PostsListPageState extends State<PostsListPage> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = e.toString().contains('Failed to load posts')
-            ? '게시물을 불러오는데 실패했습니다.'
-            : '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
+        _errorMessage =
+            e.toString().contains('Failed to load posts')
+                ? '게시물을 불러오는데 실패했습니다.'
+                : '네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.';
         _isLoading = false;
       });
-      print('게시물 로딩 오류: $e');
+      debugPrint('게시물 로딩 오류: $e');
     }
   }
 
@@ -70,9 +73,11 @@ class _PostsListPageState extends State<PostsListPage> {
     for (String key in keys) {
       String? value = post[key]?.toString();
       if (value != null && value.isNotEmpty) {
-        imageUrls.add(value.startsWith('http')
-            ? value
-            : '${ApiService.baseUrl}/uploads/$value');
+        imageUrls.add(
+          value.startsWith('http')
+              ? value
+              : '${ApiService.baseUrl}/uploads/$value',
+        );
       }
     }
 
@@ -125,9 +130,15 @@ class _PostsListPageState extends State<PostsListPage> {
         scrolledUnderElevation: 0,
         elevation: 0,
         centerTitle: true,
-        shape: const Border(bottom: BorderSide(color: Color(0xFFD7D7D7), width: 1)),
+        shape: const Border(
+          bottom: BorderSide(color: Color(0xFFD7D7D7), width: 1),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.chevron_left, color: Color(0xFFD1D2D1), size: 35),
+          icon: const Icon(
+            Icons.chevron_left,
+            color: Color(0xFFD1D2D1),
+            size: 35,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
@@ -143,7 +154,9 @@ class _PostsListPageState extends State<PostsListPage> {
 
   Widget _buildBody() {
     if (_isLoading) {
-      return const Center(child: CircularProgressIndicator(color: Color(0xFFFFB800)));
+      return const Center(
+        child: CircularProgressIndicator(color: Color(0xFFFFB800)),
+      );
     }
 
     if (_errorMessage != null) {
@@ -161,7 +174,9 @@ class _PostsListPageState extends State<PostsListPage> {
             const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _refreshPosts,
-              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFB800)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFFB800),
+              ),
               child: const Text('다시 시도', style: TextStyle(color: Colors.white)),
             ),
           ],
@@ -207,18 +222,19 @@ class _PostsListPageState extends State<PostsListPage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => PostDetailWidget(
-                      selectedImages: null,
-                      postData: {
-                        'userName': _getPostUserName(post),
-                        'userGrade': _getPostUserGrade(post),
-                        'statusMessage': post['comment'] ?? '내용이 없습니다.',
-                        'timestamp': post['created_at'] ?? '시간 정보 없음',
-                        'imageUrls': _getImageUrls(post),
-                      },
-                      postId: post['id'],
-                      greyContainerCount: _getImageCount(post),
-                    ),
+                    builder:
+                        (context) => PostDetailWidget(
+                          selectedImages: null,
+                          postData: {
+                            'userName': _getPostUserName(post),
+                            'userGrade': _getPostUserGrade(post),
+                            'statusMessage': post['comment'] ?? '내용이 없습니다.',
+                            'timestamp': post['created_at'] ?? '시간 정보 없음',
+                            'imageUrls': _getImageUrls(post),
+                          },
+                          postId: post['id'],
+                          greyContainerCount: _getImageCount(post),
+                        ),
                   ),
                 );
               },

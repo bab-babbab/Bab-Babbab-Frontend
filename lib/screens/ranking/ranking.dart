@@ -456,7 +456,7 @@ class _RankingMainContent extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
               child: Row(
                 children: [
-                  Container(
+                  SizedBox(
                     width: 24,
                     child: Text(
                       '${index + 1}',

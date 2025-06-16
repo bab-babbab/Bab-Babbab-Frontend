@@ -78,7 +78,7 @@ class _PostsPageState extends State<PostsPage> {
       setState(() {
         _isLoadingPosts = false;
       });
-      print('❌ 최근 게시물 로딩 실패: $e');
+      debugPrint('❌ 최근 게시물 로딩 실패: $e');
     }
   }
 

@@ -11,7 +11,6 @@ class MealService {
         'https://open.neis.go.kr/hub/schoolInfo?KEY=$_mealApiKey&Type=json&SCHUL_NM=$encodedName';
 
     final response = await http.get(Uri.parse(url));
-    print('📦 schoolInfo response: ${response.body}');
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       final row = data['schoolInfo'][1]['row'][0];

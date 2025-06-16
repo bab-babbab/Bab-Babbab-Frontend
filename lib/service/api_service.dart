@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:http_parser/http_parser.dart';
 import 'package:bab_babbab_front/models/school_info_dto.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter/foundation.dart';
 
 class ApiService {
   static const String baseUrl = 'http://3.34.122.170:3000';
@@ -73,7 +74,7 @@ class ApiService {
 
       return {'name': name, 'grade': grade, 'class': classNum};
     } catch (e) {
-      print('사용자 정보 가져오기 오류: $e');
+      debugPrint('사용자 정보 가져오기 오류: $e');
       return {'name': '사용자', 'grade': '0', 'class': '0'};
     }
   }
@@ -102,10 +103,11 @@ class ApiService {
     File? imageFile,
   }) async {
     final uri = Uri.parse('$baseUrl/user/user-info');
-    final request = http.MultipartRequest('POST', uri)
-      ..fields['id'] = id
-      ..fields['name'] = name
-      ..fields['message'] = message;
+    final request =
+        http.MultipartRequest('POST', uri)
+          ..fields['id'] = id
+          ..fields['name'] = name
+          ..fields['message'] = message;
 
     if (imageFile != null) {
       final image = await http.MultipartFile.fromPath(
@@ -135,43 +137,43 @@ class ApiService {
     XFile? image3,
   }) async {
     try {
-      print('uploadPost 시작 - userId: $userId, comment: $comment');
-      
+      debugPrint('uploadPost 시작 - userId: $userId, comment: $comment');
+
       var request = http.MultipartRequest('POST', Uri.parse('$baseUrl/posts'));
 
       request.fields['user_id'] = userId;
       request.fields['comment'] = comment;
 
       if (image1 != null) {
-        print('이미지 1 추가: ${image1.path}');
+        debugPrint('이미지 1 추가: ${image1.path}');
         var file = await http.MultipartFile.fromPath('photo_b', image1.path);
         request.files.add(file);
       }
       if (image2 != null) {
-        print('이미지 2 추가: ${image2.path}');
+        debugPrint('이미지 2 추가: ${image2.path}');
         var file = await http.MultipartFile.fromPath('photo_l', image2.path);
         request.files.add(file);
       }
       if (image3 != null) {
-        print('이미지 3 추가: ${image3.path}');
+        debugPrint('이미지 3 추가: ${image3.path}');
         var file = await http.MultipartFile.fromPath('photo_d', image3.path);
         request.files.add(file);
       }
-      print('요청 전송 시작');
-      
+      debugPrint('요청 전송 시작');
+
       final streamedResponse = await request.send();
       final responseBody = await streamedResponse.stream.bytesToString();
 
-      print('서버 응답 상태: ${streamedResponse.statusCode}');
-      print('서버 응답 내용: $responseBody');
+      debugPrint('서버 응답 상태: ${streamedResponse.statusCode}');
+      debugPrint('서버 응답 내용: $responseBody');
 
       return http.Response(
-        responseBody, 
+        responseBody,
         streamedResponse.statusCode,
         headers: streamedResponse.headers,
       );
     } catch (e) {
-      print('uploadPost 오류: $e');
+      debugPrint('uploadPost 오류: $e');
       rethrow;
     }
   }
