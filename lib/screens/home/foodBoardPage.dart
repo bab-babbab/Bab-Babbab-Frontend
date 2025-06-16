@@ -62,13 +62,6 @@ class _FoodBoardPageState extends State<FoodBoardPage> {
     double containerWidth = screenWidth - 50;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add, color: Colors.white),
-        elevation: 0,
-        backgroundColor: Color(0xffFFAD0A),
-        shape: CircleBorder(),
-      ),
       backgroundColor: const Color(0xffF7F8F9),
       appBar: AppBar(
         leading: IconButton(
