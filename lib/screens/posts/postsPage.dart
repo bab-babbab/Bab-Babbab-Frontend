@@ -1,4 +1,6 @@
 import 'package:bab_babbab_front/screens/posts/posts_page.dart';
+import 'package:bab_babbab_front/widgets/postWidget.dart';
+import 'package:bab_babbab_front/widgets/post_detail_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -13,13 +15,18 @@ class PostsPage extends StatefulWidget {
 }
 
 class _PostsPageState extends State<PostsPage> {
+  static const String baseUrl = 'http://localhost:3000';
+
   late Future<Map<String, int>> activityData;
+  List<Map<String, dynamic>> _recentPosts = [];
+  bool _isLoadingPosts = true;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     final user = Provider.of<UserModel>(context);
     activityData = fetchActivityData(user.id);
+    _fetchRecentPosts();
   }
 
   Future<Map<String, int>> fetchActivityData(String userId) async {
@@ -33,6 +40,165 @@ class _PostsPageState extends State<PostsPage> {
     } else {
       throw Exception('데이터를 불러오지 못했습니다');
     }
+  }
+
+  // 🔥 최근 게시물 3개를 가져오는 함수
+  Future<void> _fetchRecentPosts() async {
+    try {
+      setState(() {
+        _isLoadingPosts = true;
+      });
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/posts'), // 전체 게시물 가져오기
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final List<dynamic> postsData = json.decode(response.body);
+        List<Map<String, dynamic>> postsWithUserInfo = [];
+
+        final userModel = Provider.of<UserModel>(context, listen: false);
+
+        // 최근 3개만 처리
+        final recentPostsData = postsData.take(3).toList();
+
+        // 각 게시물에 대해 사용자 정보를 가져와서 추가
+        for (var post in recentPostsData) {
+          Map<String, dynamic> postWithUserInfo = Map<String, dynamic>.from(
+            post,
+          );
+
+          // 현재 로그인한 사용자가 아닌 경우에만 사용자 정보 API 호출
+          if (post['user_id'] != userModel.id) {
+            Map<String, String> userInfo = await _getUserInfo(post['user_id']);
+            postWithUserInfo['_cached_user_name'] = userInfo['name'];
+            postWithUserInfo['_cached_user_grade'] = userInfo['grade'];
+            postWithUserInfo['_cached_user_class'] = userInfo['class'];
+          }
+
+          postsWithUserInfo.add(postWithUserInfo);
+        }
+
+        setState(() {
+          _recentPosts = postsWithUserInfo;
+          _isLoadingPosts = false;
+        });
+      } else {
+        setState(() {
+          _isLoadingPosts = false;
+        });
+      }
+    } catch (e) {
+      setState(() {
+        _isLoadingPosts = false;
+      });
+      print('❌ 최근 게시물 로딩 실패: $e');
+    }
+  }
+
+  // 🔥 user_id로 사용자 정보를 가져오는 함수
+  Future<Map<String, String>> _getUserInfo(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/home/user/$userId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final userInfo = responseData['userInfo'];
+        final schoolInfo = responseData['schoolInfo'];
+
+        String name = userInfo['name'] ?? '사용자';
+        String grade = schoolInfo['grade']?.toString() ?? '0';
+        String classNum = schoolInfo['class']?.toString() ?? '0';
+
+        return {'name': name, 'grade': grade, 'class': classNum};
+      }
+    } catch (e) {
+      print('❌ 사용자 정보 가져오기 오류: $e');
+    }
+
+    return {'name': '사용자', 'grade': '0', 'class': '0'};
+  }
+
+  // 🔥 게시물 작성자 정보를 반환하는 함수
+  String _getPostUserName(Map<String, dynamic> post) {
+    final userModel = Provider.of<UserModel>(context, listen: false);
+
+    if (post['user_id'] == userModel.id) {
+      return userModel.name.isNotEmpty ? userModel.name : '나';
+    }
+
+    String cachedName = post['_cached_user_name'] ?? '사용자';
+    return cachedName;
+  }
+
+  // 🔥 게시물 작성자 학년/반 정보를 반환하는 함수
+  String _getPostUserGrade(Map<String, dynamic> post) {
+    final userModel = Provider.of<UserModel>(context, listen: false);
+
+    if (post['user_id'] == userModel.id) {
+      return userModel.gradeClass;
+    }
+
+    String? cachedGrade = post['_cached_user_grade'];
+    String? cachedClass = post['_cached_user_class'];
+
+    if (cachedGrade != null &&
+        cachedClass != null &&
+        cachedGrade != '0' &&
+        cachedClass != '0') {
+      return '${cachedGrade}학년/${cachedClass}반';
+    }
+
+    return '학년/반 정보 없음';
+  }
+
+  int _getImageCount(Map<String, dynamic> post) {
+    int count = 0;
+    if (post['photo_b'] != null && post['photo_b'].toString().isNotEmpty)
+      count++;
+    if (post['photo_l'] != null && post['photo_l'].toString().isNotEmpty)
+      count++;
+    if (post['photo_d'] != null && post['photo_d'].toString().isNotEmpty)
+      count++;
+    return count;
+  }
+
+  // 🔥 이미지 URL 리스트를 반환하는 함수
+  List<String> _getImageUrls(Map<String, dynamic> post) {
+    List<String> imageUrls = [];
+
+    if (post['photo_b'] != null && post['photo_b'].toString().isNotEmpty) {
+      String photoB = post['photo_b'].toString();
+      if (photoB.startsWith('http')) {
+        imageUrls.add(photoB);
+      } else {
+        imageUrls.add('$baseUrl/uploads/$photoB');
+      }
+    }
+
+    if (post['photo_l'] != null && post['photo_l'].toString().isNotEmpty) {
+      String photoL = post['photo_l'].toString();
+      if (photoL.startsWith('http')) {
+        imageUrls.add(photoL);
+      } else {
+        imageUrls.add('$baseUrl/uploads/$photoL');
+      }
+    }
+
+    if (post['photo_d'] != null && post['photo_d'].toString().isNotEmpty) {
+      String photoD = post['photo_d'].toString();
+      if (photoD.startsWith('http')) {
+        imageUrls.add(photoD);
+      } else {
+        imageUrls.add('$baseUrl/uploads/$photoD');
+      }
+    }
+
+    return imageUrls;
   }
 
   Color getColorByCount(int? count) {
@@ -129,14 +295,89 @@ class _PostsPageState extends State<PostsPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 20),
-            Container(
-              width: containerWidth,
-              height: 200,
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.all(Radius.circular(15)),
-              ),
+            const SizedBox(height: 10),
+            // 🔥 게시물 미리보기 (PostWidget 사용)
+            Expanded(
+              child:
+                  _isLoadingPosts
+                      ? const Center(
+                        child: CircularProgressIndicator(
+                          color: Color(0xFFFFB800),
+                        ),
+                      )
+                      : _recentPosts.isEmpty
+                      ? Center(
+                        child: Container(
+                          width: containerWidth,
+                          height: 200,
+                          decoration: const BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.all(Radius.circular(15)),
+                          ),
+                          child: const Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.post_add,
+                                size: 48,
+                                color: Color(0xFFCCCCCC),
+                              ),
+                              SizedBox(height: 12),
+                              Text(
+                                '최근 게시물이 없습니다.',
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: Color(0xFF999999),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      )
+                      : ListView.builder(
+                        itemCount: _recentPosts.length,
+                        itemBuilder: (context, index) {
+                          final post = _recentPosts[index];
+                          return Padding(
+                            padding: EdgeInsets.only(bottom: 16),
+                            child: PostWidget(
+                              userName: _getPostUserName(post),
+                              userGrade: _getPostUserGrade(post),
+                              statusMessage: post['comment'] ?? '내용이 없습니다.',
+                              isTopPost: false, // 미리보기에서는 상단 게시물 표시 안함
+                              imageCount: _getImageCount(post),
+                              imageUrls: _getImageUrls(post),
+                              onDetailTap: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder:
+                                        (context) => PostDetailWidget(
+                                          selectedImages: null,
+                                          postData: {
+                                            'userName': _getPostUserName(post),
+                                            'userGrade': _getPostUserGrade(
+                                              post,
+                                            ),
+                                            'statusMessage':
+                                                post['comment'] ?? '내용이 없습니다.',
+                                            'timestamp':
+                                                post['created_at'] ??
+                                                '시간 정보 없음',
+                                            'imageUrls': _getImageUrls(post),
+                                          },
+                                          postId: post['id'],
+                                          greyContainerCount: _getImageCount(
+                                            post,
+                                          ),
+                                        ),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        },
+                      ),
             ),
           ],
         ),
