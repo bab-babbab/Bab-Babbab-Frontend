@@ -339,9 +339,9 @@ class _RankingMainContent extends StatelessWidget {
                             Text(
                               '${currentUserStats?['streak'] ?? 0}',
                               style: const TextStyle(
-                                fontSize: 15,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xffFFAD0A),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xff585858),
                               ),
                             ),
                           ],
@@ -366,7 +366,7 @@ class _RankingMainContent extends StatelessWidget {
                         Text(
                           '${currentUserStats?['badge'] ?? 0}개의 뱃지',
                           style: TextStyle(
-                            fontSize: 10,
+                            fontSize: 12,
                             fontFamily: 'Pretendard',
                             color: Color(0xff898A8D),
                           ),
