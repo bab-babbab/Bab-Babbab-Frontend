@@ -6,6 +6,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'package:provider/provider.dart';
 import 'package:bab_babbab_front/models/user_model.dart';
+import 'package:bab_babbab_front/service/api_service.dart';
 
 class PostsPage extends StatefulWidget {
   const PostsPage({super.key});
@@ -25,7 +26,7 @@ class _PostsPageState extends State<PostsPage> {
   void didChangeDependencies() {
     super.didChangeDependencies();
     final user = Provider.of<UserModel>(context);
-    activityData = fetchActivityData(user.id);
+    activityData = ApiService.fetchActivityData(user.id);
     _fetchRecentPosts();
   }
 
@@ -48,74 +49,36 @@ class _PostsPageState extends State<PostsPage> {
         _isLoadingPosts = true;
       });
 
-      final response = await http.get(
-        Uri.parse('$baseUrl/posts'),
-        headers: {'Content-Type': 'application/json'},
-      );
+      final postsData = await ApiService.getPosts();
+      final userModel = Provider.of<UserModel>(context, listen: false);
 
-      if (response.statusCode == 200) {
-        final List<dynamic> postsData = json.decode(response.body);
-        List<Map<String, dynamic>> postsWithUserInfo = [];
+      List<Map<String, dynamic>> postsWithUserInfo = [];
+      final recentPostsData = postsData.take(3).toList();
 
-        final userModel = Provider.of<UserModel>(context, listen: false);
+      for (var post in recentPostsData) {
+        Map<String, dynamic> postWithUserInfo = Map<String, dynamic>.from(post);
 
-        final recentPostsData = postsData.take(3).toList();
-
-        for (var post in recentPostsData) {
-          Map<String, dynamic> postWithUserInfo = Map<String, dynamic>.from(
-            post,
-          );
-
-          if (post['user_id'] != userModel.id) {
-            Map<String, String> userInfo = await _getUserInfo(post['user_id']);
-            postWithUserInfo['_cached_user_name'] = userInfo['name'];
-            postWithUserInfo['_cached_user_grade'] = userInfo['grade'];
-            postWithUserInfo['_cached_user_class'] = userInfo['class'];
-          }
-
-          postsWithUserInfo.add(postWithUserInfo);
+        if (post['user_id'] != userModel.id) {
+          Map<String, String> userInfo =
+              await ApiService.getUserDetails(post['user_id']);
+          postWithUserInfo['_cached_user_name'] = userInfo['name'];
+          postWithUserInfo['_cached_user_grade'] = userInfo['grade'];
+          postWithUserInfo['_cached_user_class'] = userInfo['class'];
         }
 
-        setState(() {
-          _recentPosts = postsWithUserInfo;
-          _isLoadingPosts = false;
-        });
-      } else {
-        setState(() {
-          _isLoadingPosts = false;
-        });
+        postsWithUserInfo.add(postWithUserInfo);
       }
+
+      setState(() {
+        _recentPosts = postsWithUserInfo;
+        _isLoadingPosts = false;
+      });
     } catch (e) {
       setState(() {
         _isLoadingPosts = false;
       });
       print('❌ 최근 게시물 로딩 실패: $e');
     }
-  }
-
-  Future<Map<String, String>> _getUserInfo(String userId) async {
-    try {
-      final response = await http.get(
-        Uri.parse('$baseUrl/home/user/$userId'),
-        headers: {'Content-Type': 'application/json'},
-      );
-
-      if (response.statusCode == 200) {
-        final responseData = json.decode(response.body);
-        final userInfo = responseData['userInfo'];
-        final schoolInfo = responseData['schoolInfo'];
-
-        String name = userInfo['name'] ?? '사용자';
-        String grade = schoolInfo['grade']?.toString() ?? '0';
-        String classNum = schoolInfo['class']?.toString() ?? '0';
-
-        return {'name': name, 'grade': grade, 'class': classNum};
-      }
-    } catch (e) {
-      print('❌ 사용자 정보 가져오기 오류: $e');
-    }
-
-    return {'name': '사용자', 'grade': '0', 'class': '0'};
   }
 
   String _getPostUserName(Map<String, dynamic> post) {
