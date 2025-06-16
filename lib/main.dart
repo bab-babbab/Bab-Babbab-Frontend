@@ -9,7 +9,6 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'models/user_model.dart';
 
-
 void main() async {
   await dotenv.load(fileName: "assets/config/.env");
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,9 +20,7 @@ void main() async {
   }
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => UserModel()),
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => UserModel())],
       child: MainApp(),
     ),
   );
@@ -43,7 +40,7 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'bab-babbab',
 
-      home:SelectPage(),
+      home: SelectPage(),
     );
   }
 }

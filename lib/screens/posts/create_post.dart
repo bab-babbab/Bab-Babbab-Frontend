@@ -294,123 +294,125 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: Stack(
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: 43),
-                const Text(
-                  '오늘의 한마디',
-                  style: TextStyle(
-                    fontFamily: 'Pretendard',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 20,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: _commentController,
-                  maxLength: 20,
-                  decoration: const InputDecoration(
-                    enabledBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
+      body: SingleChildScrollView(
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 28.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 43),
+                  const Text(
+                    '오늘의 한마디',
+                    style: TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
                     ),
-                    focusedBorder: UnderlineInputBorder(
-                      borderSide: BorderSide(color: Colors.grey),
-                    ),
-                    hintText: '한마디를 작성해주세요.',
-                    hintStyle: TextStyle(
-                      fontFamily: 'pretendard',
-                      fontSize: 16,
-                      color: Color(0xffAAAAAA),
-                    ),
-                    counterText: '최대 20자',
                   ),
-                ),
-                const SizedBox(height: 69),
-                const Text(
-                  '사진 (선택, 최대 3장)',
-                  style: TextStyle(
-                    fontFamily: 'Pretendard',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 20,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                const Text(
-                  '사진을 업로드해주세요.',
-                  style: TextStyle(
-                    color: Color(0xffAAAAAA),
-                    fontSize: 14,
-                    fontFamily: 'Pretendard',
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    _buildFirstImageBox(
-                      pickedImage1,
-                      1,
-                      () => _showBottomSheet(1),
-                    ),
-                    if (pickedImage1 != null) ...[
-                      _buildImageBox(pickedImage2, 2),
-                      _buildImageBox(pickedImage3, 3),
-                    ],
-                  ],
-                ),
-                Container(
-                  margin: EdgeInsets.only(
-                    top: pickedImage1 != null ? 255 : 236,
-                  ),
-                  width: double.infinity,
-                  height: 60,
-                  child: ElevatedButton(
-                    onPressed:
-                        (_commentController.text.trim().isNotEmpty &&
-                                !_isLoading)
-                            ? _uploadPost
-                            : null,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFFFB800),
-                      disabledBackgroundColor: const Color(0xffD9D9D9),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                  const SizedBox(height: 8),
+                  TextField(
+                    controller: _commentController,
+                    maxLength: 20,
+                    decoration: const InputDecoration(
+                      enabledBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey),
                       ),
+                      focusedBorder: UnderlineInputBorder(
+                        borderSide: BorderSide(color: Colors.grey),
+                      ),
+                      hintText: '한마디를 작성해주세요.',
+                      hintStyle: TextStyle(
+                        fontFamily: 'pretendard',
+                        fontSize: 16,
+                        color: Color(0xffAAAAAA),
+                      ),
+                      counterText: '최대 20자',
                     ),
-                    child:
-                        _isLoading
-                            ? const SizedBox(
-                              width: 20,
-                              height: 20,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                            : const Text(
-                              '작성하기',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontFamily: 'Pretendard',
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
                   ),
-                ),
-              ],
+                  const SizedBox(height: 69),
+                  const Text(
+                    '사진 (선택, 최대 3장)',
+                    style: TextStyle(
+                      fontFamily: 'Pretendard',
+                      fontWeight: FontWeight.w600,
+                      fontSize: 20,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  const Text(
+                    '사진을 업로드해주세요.',
+                    style: TextStyle(
+                      color: Color(0xffAAAAAA),
+                      fontSize: 14,
+                      fontFamily: 'Pretendard',
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      _buildFirstImageBox(
+                        pickedImage1,
+                        1,
+                        () => _showBottomSheet(1),
+                      ),
+                      if (pickedImage1 != null) ...[
+                        _buildImageBox(pickedImage2, 2),
+                        _buildImageBox(pickedImage3, 3),
+                      ],
+                    ],
+                  ),
+                  Container(
+                    margin: EdgeInsets.only(
+                      top: pickedImage1 != null ? 255 : 236,
+                    ),
+                    width: double.infinity,
+                    height: 60,
+                    child: ElevatedButton(
+                      onPressed:
+                          (_commentController.text.trim().isNotEmpty &&
+                                  !_isLoading)
+                              ? _uploadPost
+                              : null,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFFFB800),
+                        disabledBackgroundColor: const Color(0xffD9D9D9),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child:
+                          _isLoading
+                              ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  color: Colors.white,
+                                  strokeWidth: 2,
+                                ),
+                              )
+                              : const Text(
+                                '작성하기',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontFamily: 'Pretendard',
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-          if (_isLoading)
-            Container(
-              color: Colors.black.withOpacity(0.3),
-              child: const Center(child: CircularProgressIndicator()),
-            ),
-        ],
+            if (_isLoading)
+              Container(
+                color: Colors.black.withOpacity(0.3),
+                child: const Center(child: CircularProgressIndicator()),
+              ),
+          ],
+        ),
       ),
     );
   }
