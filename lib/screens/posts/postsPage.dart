@@ -32,7 +32,7 @@ class _PostsPageState extends State<PostsPage> {
 
   Future<Map<String, int>> fetchActivityData(String userId) async {
     final response = await http.get(
-      Uri.parse('http://localhost:3000/stats/daily/$userId'),
+      Uri.parse('http://3.34.122.170:3000/stats/daily/$userId'),
     );
 
     if (response.statusCode == 200) {
@@ -59,8 +59,9 @@ class _PostsPageState extends State<PostsPage> {
         Map<String, dynamic> postWithUserInfo = Map<String, dynamic>.from(post);
 
         if (post['user_id'] != userModel.id) {
-          Map<String, String> userInfo =
-              await ApiService.getUserDetails(post['user_id']);
+          Map<String, String> userInfo = await ApiService.getUserDetails(
+            post['user_id'],
+          );
           postWithUserInfo['_cached_user_name'] = userInfo['name'];
           postWithUserInfo['_cached_user_grade'] = userInfo['grade'];
           postWithUserInfo['_cached_user_class'] = userInfo['class'];

@@ -35,7 +35,7 @@ class Comment {
 
 // 댓글 API 서비스
 class CommentService {
-  static const String baseUrl = 'http://localhost:3000'; // 🔥 실제 서버 URL
+  static const String baseUrl = 'http://3.34.122.170:3000'; // 🔥 실제 서버 URL
 
   // 🔥 댓글 작성 API - POST /posts/:id/replys
   static Future<bool> addComment({
@@ -146,7 +146,7 @@ class CommentService {
 
 // 🔥 게시물 상세 API 서비스
 class PostDetailService {
-  static const String baseUrl = 'http://localhost:3000';
+  static const String baseUrl = 'http://3.34.122.170:3000';
 
   // GET "/posts/:id" - 게시물 상세 조회
   static Future<Map<String, dynamic>?> getPostDetail(String postId) async {
