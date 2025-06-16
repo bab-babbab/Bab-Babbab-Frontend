@@ -6,29 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:provider/provider.dart';
 import 'package:bab_babbab_front/models/user_model.dart';
-
-class SchoolInfoDto {
-  final String id;
-  final String schoolName;
-  final int grade;
-  final int classNumber;
-
-  SchoolInfoDto({
-    required this.id,
-    required this.schoolName,
-    required this.grade,
-    required this.classNumber,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'school_name': schoolName,
-      'grade': grade,
-      'class': classNumber,
-    };
-  }
-}
+import 'package:bab_babbab_front/service/api_service.dart';
+import 'package:bab_babbab_front/models/school_info_dto.dart';
 
 class InformationStuPage extends StatefulWidget {
   final String id;
@@ -107,7 +86,6 @@ class _InformationStuPage extends State<InformationStuPage> {
     });
   }
 
-  // 🔥🔥🔥 학교 정보 제출 (학년/반 정보 UserModel에 저장)
   Future<void> submitSchoolInfo() async {
     final dto = SchoolInfoDto(
       id: widget.id,
@@ -116,50 +94,35 @@ class _InformationStuPage extends State<InformationStuPage> {
       classNumber: int.parse(selectedClass!),
     );
 
-    final uri = Uri.parse('http://localhost:3000/user/school-info');
-    final headers = {'Content-Type': 'application/json'};
+    try {
+      final res = await ApiService.submitSchoolInfo(dto);
 
-    final res = await http.post(
-      uri,
-      headers: headers,
-      body: jsonEncode(dto.toJson()),
-    );
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final userProvider = Provider.of<UserModel>(context, listen: false);
 
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      final userProvider = Provider.of<UserModel>(context, listen: false);
+        userProvider.setUser(
+          id: widget.id,
+          name: widget.name,
+          message:
+              userProvider.message.isNotEmpty ? userProvider.message : "안녕하세요!",
+          school: _schoolController.text.trim(),
+          grade: selectedGrade!,
+          class_: selectedClass!,
+        );
 
-      // 🔥🔥🔥 학년/반 정보도 함께 UserModel에 저장
-      userProvider.setUser(
-        id: widget.id, // 🔥 현재 사용자 ID
-        name: widget.name, // 🔥 현재 사용자 이름
-        message:
-            userProvider.message.isNotEmpty
-                ? userProvider.message
-                : "안녕하세요!", // 🔥 기존 메시지 유지 또는 기본값
-        school: _schoolController.text.trim(), // 🔥 선택한 학교
-        grade: selectedGrade!, // 🔥 선택한 학년 ("1", "2", "3")
-        class_: selectedClass!, // 🔥 선택한 반 ("1", "2", "3", ...)
-      );
-
-      // 🔥 저장된 정보 확인용 로그
-      print('🎉 UserModel 저장 완료!');
-      print('📋 사용자 정보:');
-      print('  - ID: ${userProvider.id}');
-      print('  - 이름: ${userProvider.name}');
-      print('  - 학교: ${userProvider.school}');
-      print('  - 학년: ${userProvider.grade}');
-      print('  - 반: ${userProvider.class_}');
-      print('  - 학년/반 조합: ${userProvider.gradeClass}'); // "3학년/4반" 형식
-
-      // 홈페이지로 이동
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
-    } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('학교 정보를 저장하는 데 실패했어요.')));
+      }
+    } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('학교 정보를 저장하는 데 실패했어요.')));
+      ).showSnackBar(const SnackBar(content: Text('오류가 발생했어요. 다시 시도해주세요.')));
     }
   }
 
@@ -215,7 +178,6 @@ class _InformationStuPage extends State<InformationStuPage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 🔥 학년 선택 드롭다운
                 DropdownButton2<String>(
                   value: selectedGrade,
                   hint: const Text(
@@ -274,7 +236,6 @@ class _InformationStuPage extends State<InformationStuPage> {
                   ),
                 ),
                 const SizedBox(width: 30),
-                // 🔥 반 선택 드롭다운
                 DropdownButton2<String>(
                   value: selectedClass,
                   hint: const Text(

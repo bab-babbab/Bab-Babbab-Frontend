@@ -6,6 +6,7 @@ import 'package:dotted_border/dotted_border.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:bab_babbab_front/models/user_model.dart';
+import 'package:bab_babbab_front/service/api_service.dart';
 
 class ImageUploadScreen extends StatefulWidget {
   const ImageUploadScreen({Key? key}) : super(key: key);
@@ -17,23 +18,28 @@ class ImageUploadScreen extends StatefulWidget {
 class _ImageUploadScreenState extends State<ImageUploadScreen> {
   final ImagePicker picker = ImagePicker();
   final TextEditingController _commentController = TextEditingController();
-  
+
   static const String baseUrl = 'http://localhost:3000';
-  
+
   XFile? pickedImage1;
   XFile? pickedImage2;
   XFile? pickedImage3;
-  
+
   bool _isLoading = false;
 
   void _pickImage(int index, ImageSource source) async {
-    final pickedFile = await picker.pickImage(source: source);
-    if (pickedFile != null) {
-      setState(() {
-        if (index == 1) pickedImage1 = pickedFile;
-        if (index == 2) pickedImage2 = pickedFile;
-        if (index == 3) pickedImage3 = pickedFile;
-      });
+    try {
+      final pickedFile = await picker.pickImage(source: source);
+      if (pickedFile != null) {
+        setState(() {
+          if (index == 1) pickedImage1 = pickedFile;
+          if (index == 2) pickedImage2 = pickedFile;
+          if (index == 3) pickedImage3 = pickedFile;
+        });
+      }
+    } catch (e) {
+      print('이미지 선택 오류: $e');
+      _showErrorDialog('이미지를 선택하는 중 오류가 발생했습니다.');
     }
   }
 
@@ -84,43 +90,41 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
     return GestureDetector(
       onTap: () => _showBottomSheet(index),
       child: Container(
-        margin: EdgeInsets.only(
-          left: index == 0 ? 0 : 10,
-          right: 10,
-        ),
-        child: file == null
-            ? DottedBorder(
-                color: const Color(0xffFFAD0A),
-                strokeWidth: 1.6,
-                dashPattern: const [6, 3],
-                borderType: BorderType.RRect,
-                radius: const Radius.circular(7),
-                child: Container(
+        margin: EdgeInsets.only(left: index == 0 ? 0 : 10, right: 10),
+        child:
+            file == null
+                ? DottedBorder(
+                  color: const Color(0xffFFAD0A),
+                  strokeWidth: 1.6,
+                  dashPattern: const [6, 3],
+                  borderType: BorderType.RRect,
+                  radius: const Radius.circular(7),
+                  child: Container(
+                    width: 88,
+                    height: 71,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(7),
+                      color: const Color(0xffFFF9EC),
+                    ),
+                    child: const Icon(
+                      Icons.add,
+                      color: Color(0xffFFAD0A),
+                      size: 30,
+                    ),
+                  ),
+                )
+                : Container(
                   width: 88,
                   height: 71,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(7),
                     color: const Color(0xffFFF9EC),
                   ),
-                  child: const Icon(
-                    Icons.add,
-                    color: Color(0xffFFAD0A),
-                    size: 30,
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(7),
+                    child: Image.file(File(file.path), fit: BoxFit.fill),
                   ),
                 ),
-              )
-            : Container(
-                width: 88,
-                height: 71,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(7),
-                  color: const Color(0xffFFF9EC),
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(7),
-                  child: Image.file(File(file.path), fit: BoxFit.fill),
-                ),
-              ),
       ),
     );
   }
@@ -169,16 +173,14 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
     }
   }
 
-  // API에 게시물을 업로드하는 함수
   Future<void> _uploadPost() async {
     if (_commentController.text.trim().isEmpty) {
       _showErrorDialog('한마디를 작성해주세요.');
       return;
     }
 
-    // UserModel에서 사용자 정보 가져오기
     final userModel = Provider.of<UserModel>(context, listen: false);
-    
+
     if (userModel.id.isEmpty) {
       _showErrorDialog('사용자 정보를 찾을 수 없습니다.');
       return;
@@ -189,102 +191,81 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
     });
 
     try {
-      var request = http.MultipartRequest(
-        'POST',
-        Uri.parse('$baseUrl/posts'),
+      print('업로드 시작 - 사용자 ID: ${userModel.id}');
+      print('댓글: ${_commentController.text.trim()}');
+      print('이미지 1: ${pickedImage1?.path}');
+      print('이미지 2: ${pickedImage2?.path}');
+      print('이미지 3: ${pickedImage3?.path}');
+
+      final response = await ApiService.uploadPost(
+        userId: userModel.id,
+        comment: _commentController.text.trim(),
+        image1: pickedImage1,
+        image2: pickedImage2,
+        image3: pickedImage3,
       );
 
-      request.fields['user_id'] = userModel.id;
-      request.fields['comment'] = _commentController.text.trim();
-
-      if (pickedImage1 != null) {
-        var file = await http.MultipartFile.fromPath(
-          'photo_b',
-          pickedImage1!.path,
-        );
-        request.files.add(file);
-      }
-
-      if (pickedImage2 != null) {
-        var file = await http.MultipartFile.fromPath(
-          'photo_l',
-          pickedImage2!.path,
-        );
-        request.files.add(file);
-      }
-
-      if (pickedImage3 != null) {
-        var file = await http.MultipartFile.fromPath(
-          'photo_d',
-          pickedImage3!.path,
-        );
-        request.files.add(file);
-      }
-
-      request.headers.addAll({
-        'Content-Type': 'multipart/form-data',
-      });
-
-      var response = await request.send();
-      var responseBody = await response.stream.bytesToString();
+      print('서버 응답 상태 코드: ${response.statusCode}');
+      print('서버 응답 내용: ${response.body}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        print('Upload successful!'); 
         _showSuccessDialog();
       } else {
         String errorMessage = '업로드에 실패했습니다.';
         try {
-          var errorData = json.decode(responseBody);
+          var errorData = json.decode(response.body);
           if (errorData['message'] != null) {
             errorMessage += '\n${errorData['message']}';
           }
-        } catch (e) {
+        } catch (jsonError) {
+          print('JSON 파싱 오류: $jsonError');
           errorMessage += '\nStatus: ${response.statusCode}';
         }
-        
         _showErrorDialog(errorMessage);
       }
-    } catch (e) {
-      _showErrorDialog('네트워크 오류가 발생했습니다. 인터넷 연결을 확인해주세요.');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
     }
   }
 
   void _showSuccessDialog() {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("작성 완료"),
-        content: const Text("사진이 정상적으로 업로드되었습니다."),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context); 
-              Navigator.pop(context); 
-            },
-            child: const Text("확인"),
+      builder:
+          (context) => AlertDialog(
+            title: const Text("작성 완료"),
+            content: const Text("사진이 정상적으로 업로드되었습니다."),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: const Text("확인"),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
   void _showErrorDialog(String message) {
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("업로드 실패"),
-        content: Text(message),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text("확인"),
+      builder:
+          (context) => AlertDialog(
+            title: const Text("업로드 실패"),
+            content: Text(message),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text("확인"),
+              ),
+            ],
           ),
-        ],
-      ),
     );
   }
 
@@ -372,7 +353,11 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
                 const SizedBox(height: 16),
                 Row(
                   children: [
-                    _buildFirstImageBox(pickedImage1, 1, () => _showBottomSheet(1)),
+                    _buildFirstImageBox(
+                      pickedImage1,
+                      1,
+                      () => _showBottomSheet(1),
+                    ),
                     if (pickedImage1 != null) ...[
                       _buildImageBox(pickedImage2, 2),
                       _buildImageBox(pickedImage3, 3),
@@ -386,9 +371,11 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
                   width: double.infinity,
                   height: 60,
                   child: ElevatedButton(
-                    onPressed: (_commentController.text.trim().isNotEmpty && !_isLoading) 
-                        ? _uploadPost 
-                        : null,
+                    onPressed:
+                        (_commentController.text.trim().isNotEmpty &&
+                                !_isLoading)
+                            ? _uploadPost
+                            : null,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: const Color(0xFFFFB800),
                       disabledBackgroundColor: const Color(0xffD9D9D9),
@@ -396,36 +383,34 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                     ),
-                    child: _isLoading
-                        ? const SizedBox(
-                            width: 20,
-                            height: 20,
-                            child: CircularProgressIndicator(
-                              color: Colors.white,
-                              strokeWidth: 2,
+                    child:
+                        _isLoading
+                            ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                color: Colors.white,
+                                strokeWidth: 2,
+                              ),
+                            )
+                            : const Text(
+                              '작성하기',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontFamily: 'Pretendard',
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
-                          )
-                        : const Text(
-                            '작성하기',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 16,
-                              fontFamily: 'Pretendard',
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
                   ),
                 ),
               ],
             ),
           ),
-          // 로딩 오버레이
           if (_isLoading)
             Container(
               color: Colors.black.withOpacity(0.3),
-              child: const Center(
-                child: CircularProgressIndicator(),
-              ),
+              child: const Center(child: CircularProgressIndicator()),
             ),
         ],
       ),

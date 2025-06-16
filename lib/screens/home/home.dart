@@ -9,6 +9,7 @@ import 'package:bab_babbab_front/screens/mypage/mypage.dart';
 import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:bab_babbab_front/models/user_model.dart';
+import 'package:bab_babbab_front/service/api_service.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -86,21 +87,9 @@ class _HomeMainContentState extends State<_HomeMainContent> {
     super.didChangeDependencies();
     if (!_initialized) {
       final user = Provider.of<UserModel>(context);
-      userId = user.id; // 상태관리에서 user.id 추출
-      streakCount = fetchStreakCount(userId); // 연속일수 요청
+      userId = user.id;
+      streakCount = ApiService.fetchStreakCount(userId);
       _initialized = true;
-    }
-  }
-
-  Future<int> fetchStreakCount(String id) async {
-    final response = await http.get(
-      Uri.parse('http://localhost:3000/stats/sequence/$id'),
-    );
-
-    if (response.statusCode == 200 || response.statusCode == 201) {
-      return int.parse(response.body);
-    } else {
-      throw Exception('연속 일수 가져오기 실패함');
     }
   }
 

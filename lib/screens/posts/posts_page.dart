@@ -13,8 +13,6 @@ class PostsListPage extends StatefulWidget {
 }
 
 class _PostsListPageState extends State<PostsListPage> {
-  static const String baseUrl = 'http://localhost:3000';
-
   List<Map<String, dynamic>> _posts = [];
   bool _isLoading = true;
   String? _errorMessage;
@@ -65,78 +63,44 @@ class _PostsListPageState extends State<PostsListPage> {
     }
   }
 
-  int _getImageCount(Map<String, dynamic> post) {
-    int count = 0;
-    if (post['photo_b'] != null && post['photo_b'].toString().isNotEmpty)
-      count++;
-    if (post['photo_l'] != null && post['photo_l'].toString().isNotEmpty)
-      count++;
-    if (post['photo_d'] != null && post['photo_d'].toString().isNotEmpty)
-      count++;
-    return count;
-  }
-
   List<String> _getImageUrls(Map<String, dynamic> post) {
     List<String> imageUrls = [];
+    List<String> keys = ['photo_b', 'photo_l', 'photo_d'];
 
-    if (post['photo_b'] != null && post['photo_b'].toString().isNotEmpty) {
-      String photoB = post['photo_b'].toString();
-      if (photoB.startsWith('http')) {
-        imageUrls.add(photoB);
-      } else {
-        imageUrls.add('$baseUrl/uploads/$photoB');
-      }
-    }
-
-    if (post['photo_l'] != null && post['photo_l'].toString().isNotEmpty) {
-      String photoL = post['photo_l'].toString();
-      if (photoL.startsWith('http')) {
-        imageUrls.add(photoL);
-      } else {
-        imageUrls.add('$baseUrl/uploads/$photoL');
-      }
-    }
-
-    if (post['photo_d'] != null && post['photo_d'].toString().isNotEmpty) {
-      String photoD = post['photo_d'].toString();
-      if (photoD.startsWith('http')) {
-        imageUrls.add(photoD);
-      } else {
-        imageUrls.add('$baseUrl/uploads/$photoD');
+    for (String key in keys) {
+      String? value = post[key]?.toString();
+      if (value != null && value.isNotEmpty) {
+        imageUrls.add(value.startsWith('http')
+            ? value
+            : '${ApiService.baseUrl}/uploads/$value');
       }
     }
 
     return imageUrls;
   }
 
+  int _getImageCount(Map<String, dynamic> post) => _getImageUrls(post).length;
+
   String _getPostUserName(Map<String, dynamic> post) {
     final userModel = Provider.of<UserModel>(context, listen: false);
-
     if (post['user_id'] == userModel.id) {
       return userModel.name.isNotEmpty ? userModel.name : '나';
     }
-
-    String cachedName = post['_cached_user_name'] ?? '사용자';
-    return cachedName;
+    return post['_cached_user_name'] ?? '사용자';
   }
 
   String _getPostUserGrade(Map<String, dynamic> post) {
     final userModel = Provider.of<UserModel>(context, listen: false);
-
     if (post['user_id'] == userModel.id) {
       return userModel.gradeClass;
     }
 
-    String? cachedGrade = post['_cached_user_grade'];
-    String? cachedClass = post['_cached_user_class'];
+    String? grade = post['_cached_user_grade'];
+    String? classNum = post['_cached_user_class'];
 
-    if (cachedGrade != null &&
-        cachedClass != null &&
-        cachedGrade != '0' &&
-        cachedClass != '0') {
-      return '${cachedGrade}학년/${cachedClass}반';
+    if (grade != null && classNum != null && grade != '0' && classNum != '0') {
+      return '${grade}학년/${classNum}반';
     }
-
     return '학년/반 정보 없음';
   }
 
@@ -149,7 +113,7 @@ class _PostsListPageState extends State<PostsListPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           "전체 보기",
           style: TextStyle(
             color: Color(0xFF575757),
@@ -161,25 +125,25 @@ class _PostsListPageState extends State<PostsListPage> {
         scrolledUnderElevation: 0,
         elevation: 0,
         centerTitle: true,
-        shape: Border(bottom: BorderSide(color: Color(0xFFD7D7D7), width: 1)),
+        shape: const Border(bottom: BorderSide(color: Color(0xFFD7D7D7), width: 1)),
         leading: IconButton(
-          icon: Icon(Icons.chevron_left, color: Color(0xFFD1D2D1), size: 35),
+          icon: const Icon(Icons.chevron_left, color: Color(0xFFD1D2D1), size: 35),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: Color(0xFF575757)),
+            icon: const Icon(Icons.refresh, color: Color(0xFF575757)),
             onPressed: _refreshPosts,
           ),
         ],
       ),
-      body: Container(color: Color(0xFFF7F8F9), child: _buildBody()),
+      body: Container(color: const Color(0xFFF7F8F9), child: _buildBody()),
     );
   }
 
   Widget _buildBody() {
     if (_isLoading) {
-      return Center(child: CircularProgressIndicator(color: Color(0xFFFFB800)));
+      return const Center(child: CircularProgressIndicator(color: Color(0xFFFFB800)));
     }
 
     if (_errorMessage != null) {
@@ -187,20 +151,18 @@ class _PostsListPageState extends State<PostsListPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.error_outline, size: 64, color: Colors.grey),
-            SizedBox(height: 16),
+            const Icon(Icons.error_outline, size: 64, color: Colors.grey),
+            const SizedBox(height: 16),
             Text(
               _errorMessage!,
               textAlign: TextAlign.center,
               style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ElevatedButton(
               onPressed: _refreshPosts,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFFFFB800),
-              ),
-              child: Text('다시 시도', style: TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFFFB800)),
+              child: const Text('다시 시도', style: TextStyle(color: Colors.white)),
             ),
           ],
         ),
@@ -211,12 +173,12 @@ class _PostsListPageState extends State<PostsListPage> {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [
+          children: const [
             Icon(Icons.post_add, size: 64, color: Colors.grey),
             SizedBox(height: 16),
             Text(
               '등록된 게시물이 없습니다.',
-              style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+              style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
           ],
         ),
@@ -225,11 +187,11 @@ class _PostsListPageState extends State<PostsListPage> {
 
     return RefreshIndicator(
       onRefresh: _refreshPosts,
-      color: Color(0xFFFFB800),
+      color: const Color(0xFFFFB800),
       child: Padding(
-        padding: EdgeInsets.only(top: 20),
+        padding: const EdgeInsets.only(top: 20),
         child: ListView.builder(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           itemCount: _posts.length,
           itemBuilder: (context, index) {
             final post = _posts[index];

@@ -8,6 +8,7 @@ import 'dart:convert';
 import 'package:http_parser/http_parser.dart';
 import 'package:provider/provider.dart';
 import 'package:bab_babbab_front/models/user_model.dart';
+import 'package:bab_babbab_front/service/api_service.dart';
 
 class InformationPage extends StatefulWidget {
   final String id;
@@ -239,48 +240,38 @@ class _InformationPageState extends State<InformationPage> {
   }
 
   Future<void> _submitUserInfo() async {
-    final String name = nameController.text;
-    final String message = messageController.text;
+  final String name = nameController.text;
+  final String message = messageController.text;
 
-    final uri = Uri.parse('http://localhost:3000/user/user-info');
-    var request =
-        http.MultipartRequest('POST', uri)
-          ..fields['id'] = widget.id
-          ..fields['name'] = name
-          ..fields['message'] = message;
+  try {
+    final response = await ApiService.submitUserInfo(
+      id: widget.id,
+      name: name,
+      message: message,
+      imageFile: _pickedFile != null ? File(_pickedFile!.path) : null,
+    );
 
-    if (_pickedFile != null) {
-      var file = await http.MultipartFile.fromPath(
-        'profile', // 서버에서 이 파일을 받을 때 사용할 필드 이름
-        _pickedFile!.path,
-        contentType: MediaType('image', 'jpeg'),
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      Provider.of<UserModel>(
+        context,
+        listen: false,
+      ).setUser(id: widget.id, name: name, message: message, school: '');
+
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => InformationStuPage(id: widget.id, name: name),
+        ),
       );
-      request.files.add(file);
-    }
-
-    try {
-      final response = await request.send();
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        Provider.of<UserModel>(
-          context,
-          listen: false,
-        ).setUser(id: widget.id, name: name, message: message, school: '');
-
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => InformationStuPage(id: widget.id, name: name),
-          ),
-        );
-      } else {
-        if (kDebugMode) {
-          print('Failed to submit user info: ${response.statusCode}');
-        }
-      }
-    } catch (e) {
+    } else {
       if (kDebugMode) {
-        print('Error occurred: $e');
+        print('유저 등록 실패: ${response.statusCode}');
       }
+    }
+  } catch (e) {
+    if (kDebugMode) {
+      print('에러 : $e');
     }
   }
+}
 }

@@ -17,7 +17,7 @@ class SelectPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             SvgPicture.asset('assets/logo/logo.svg'),
-            const SizedBox(height: 172), // 여백
+            const SizedBox(height: 172),
             ElevatedButton.icon(
               onPressed: () async {
                 final result = await _authService.signInWithGoogle();
