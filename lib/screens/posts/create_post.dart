@@ -19,8 +19,6 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
   final ImagePicker picker = ImagePicker();
   final TextEditingController _commentController = TextEditingController();
 
-  static const String baseUrl = 'http://localhost:3000';
-
   XFile? pickedImage1;
   XFile? pickedImage2;
   XFile? pickedImage3;

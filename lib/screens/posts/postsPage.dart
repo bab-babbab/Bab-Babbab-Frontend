@@ -16,7 +16,7 @@ class PostsPage extends StatefulWidget {
 }
 
 class _PostsPageState extends State<PostsPage> {
-  static const String baseUrl = 'http://localhost:3000';
+  static const String baseUrl = 'http://3.34.122.170:3000';
 
   late Future<Map<String, int>> activityData;
   List<Map<String, dynamic>> _recentPosts = [];

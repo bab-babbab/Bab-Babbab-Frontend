@@ -6,7 +6,7 @@ import 'package:bab_babbab_front/models/school_info_dto.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ApiService {
-  static const String baseUrl = 'http://localhost:3000';
+  static const String baseUrl = 'http://3.34.122.170:3000';
 
   static Future<List<Map<String, dynamic>>> getRanking() async {
     try {
