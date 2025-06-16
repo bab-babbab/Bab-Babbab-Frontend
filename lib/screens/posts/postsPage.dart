@@ -42,7 +42,6 @@ class _PostsPageState extends State<PostsPage> {
     }
   }
 
-  // 🔥 최근 게시물 3개를 가져오는 함수
   Future<void> _fetchRecentPosts() async {
     try {
       setState(() {
@@ -50,7 +49,7 @@ class _PostsPageState extends State<PostsPage> {
       });
 
       final response = await http.get(
-        Uri.parse('$baseUrl/posts'), // 전체 게시물 가져오기
+        Uri.parse('$baseUrl/posts'),
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -60,16 +59,13 @@ class _PostsPageState extends State<PostsPage> {
 
         final userModel = Provider.of<UserModel>(context, listen: false);
 
-        // 최근 3개만 처리
         final recentPostsData = postsData.take(3).toList();
 
-        // 각 게시물에 대해 사용자 정보를 가져와서 추가
         for (var post in recentPostsData) {
           Map<String, dynamic> postWithUserInfo = Map<String, dynamic>.from(
             post,
           );
 
-          // 현재 로그인한 사용자가 아닌 경우에만 사용자 정보 API 호출
           if (post['user_id'] != userModel.id) {
             Map<String, String> userInfo = await _getUserInfo(post['user_id']);
             postWithUserInfo['_cached_user_name'] = userInfo['name'];
@@ -97,7 +93,6 @@ class _PostsPageState extends State<PostsPage> {
     }
   }
 
-  // 🔥 user_id로 사용자 정보를 가져오는 함수
   Future<Map<String, String>> _getUserInfo(String userId) async {
     try {
       final response = await http.get(
@@ -123,7 +118,6 @@ class _PostsPageState extends State<PostsPage> {
     return {'name': '사용자', 'grade': '0', 'class': '0'};
   }
 
-  // 🔥 게시물 작성자 정보를 반환하는 함수
   String _getPostUserName(Map<String, dynamic> post) {
     final userModel = Provider.of<UserModel>(context, listen: false);
 
@@ -135,7 +129,6 @@ class _PostsPageState extends State<PostsPage> {
     return cachedName;
   }
 
-  // 🔥 게시물 작성자 학년/반 정보를 반환하는 함수
   String _getPostUserGrade(Map<String, dynamic> post) {
     final userModel = Provider.of<UserModel>(context, listen: false);
 
@@ -167,7 +160,6 @@ class _PostsPageState extends State<PostsPage> {
     return count;
   }
 
-  // 🔥 이미지 URL 리스트를 반환하는 함수
   List<String> _getImageUrls(Map<String, dynamic> post) {
     List<String> imageUrls = [];
 
@@ -344,7 +336,7 @@ class _PostsPageState extends State<PostsPage> {
                               userName: _getPostUserName(post),
                               userGrade: _getPostUserGrade(post),
                               statusMessage: post['comment'] ?? '내용이 없습니다.',
-                              isTopPost: false, // 미리보기에서는 상단 게시물 표시 안함
+                              isTopPost: false,
                               imageCount: _getImageCount(post),
                               imageUrls: _getImageUrls(post),
                               onDetailTap: () {

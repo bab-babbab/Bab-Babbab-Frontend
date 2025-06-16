@@ -3,7 +3,6 @@ import 'package:bab_babbab_front/widgets/postWidget.dart';
 import 'package:bab_babbab_front/widgets/post_detail_widget.dart';
 import 'dart:io';
 
-// PostsPage 위젯
 class PostsPage extends StatefulWidget {
   const PostsPage({super.key});
 
@@ -12,7 +11,6 @@ class PostsPage extends StatefulWidget {
 }
 
 class _PostsPageState extends State<PostsPage> {
-  // 각 게시물별 이미지 데이터를 저장할 Map
   Map<int, List<File>> _postImages = {};
 
   @override
@@ -60,7 +58,7 @@ class _PostsPageState extends State<PostsPage> {
                           (context) => PostDetailWidget(
                             selectedImages: _postImages[index],
                             postData: _getPostData(index),
-                            postId: _getPostId(index), // 🔥 API 호출용 게시물 ID
+                            postId: _getPostId(index), 
                             greyContainerCount: 2,
                           ),
                     ),
