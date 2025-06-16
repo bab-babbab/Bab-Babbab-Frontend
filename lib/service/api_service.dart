@@ -175,4 +175,46 @@ class ApiService {
       rethrow;
     }
   }
+
+  static Future<Map<String, int>> fetchActivityData(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/stats/daily/$userId'),
+      );
+
+      if (response.statusCode == 200) {
+        final List data = jsonDecode(response.body);
+        return {for (var item in data) item['date']: item['count']};
+      } else {
+        throw Exception('데이터를 불러오지 못했습니다');
+      }
+    } catch (e) {
+      throw Exception('Error fetching activity data: $e');
+    }
+  }
+
+  static Future<Map<String, String>> getUserDetails(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/home/user/$userId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final userInfo = responseData['userInfo'];
+        final schoolInfo = responseData['schoolInfo'];
+
+        return {
+          'name': userInfo['name'] ?? '사용자',
+          'grade': schoolInfo['grade']?.toString() ?? '0',
+          'class': schoolInfo['class']?.toString() ?? '0',
+        };
+      } else {
+        throw Exception('Failed to load user details: ${response.statusCode}');
+      }
+    } catch (e) {
+      return {'name': '사용자', 'grade': '0', 'class': '0'};
+    }
+  }
 }
