@@ -2,19 +2,23 @@ import 'package:bab_babbab_front/screens/information/selectPage.dart';
 import 'package:bab_babbab_front/screens/mypage/mypageChange.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
+import 'package:bab_babbab_front/models/user_model.dart';
 
 class MyPage extends StatelessWidget {
   const MyPage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    final user = Provider.of<UserModel>(context);
+
     return Scaffold(
       backgroundColor: const Color(0xFFF7F8F9),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(30.0),
         child: Column(
           children: [
-            const SizedBox(height: 87),
+            const SizedBox(height: 57),
             Row(
               children: [
                 CircleAvatar(
@@ -28,112 +32,17 @@ class MyPage extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 24),
-                const Text(
-                  '정수진님',
+                Text(
+                  '${user.name}님',
                   style: TextStyle(
                     fontFamily: 'Pretendard',
                     fontSize: 22,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 32),
-
-            /// Badge + Flame + Grid Box
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(
-                      width: 107,
-                      height: 87,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: Colors.white,
-                      ),
-                      child: Center(
-                        child: Stack(
-                          alignment: Alignment.center,
-                          children: [
-                            // 배경 원형 선 이미지
-                            Image.asset(
-                              'assets/icon/circle-line.png',
-                              width: 45,
-                              height: 48,
-                            ),
-
-                            // 숫자 텍스트
-                            Text(
-                              '07',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey[800],
-                              ),
-                            ),
-
-                            // 불꽃 아이콘 (위쪽에 위치)
-                            Positioned(
-                              top: -5,
-                              child: Image.asset(
-                                'assets/icon/fire.png',
-                                width: 16,
-                                height: 16,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                    SizedBox(width: 15),
-                    Container(
-                      width: 107,
-                      height: 87,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: Colors.white,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          SvgPicture.asset(
-                            'assets/icon/badge.svg',
-                            color: Color(0xffFFAD0A),
-                            width: 27,
-                            height: 27,
-                          ),
-                          SizedBox(height: 7),
-                          Text(
-                            '7개의 뱃지',
-                            style: TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    SizedBox(width: 15),
-                    Container(
-                      width: 107,
-                      height: 87,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                        color: Colors.white,
-                      ),
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                        ]
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ),
             const SizedBox(height: 30),
 
             /// 학교/학급 정보
@@ -150,18 +59,19 @@ class MyPage extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        '미림마이스터고',
+                        user.school,
                         style: TextStyle(
                           fontFamily: 'Pretendard',
-                          fontWeight: FontWeight.bold,
+                          fontWeight: FontWeight.w600,
                           fontSize: 18,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        '2학년 4반',
+                        user.gradeClass,
                         style: TextStyle(
                           fontFamily: 'Pretendard',
+                          fontWeight: FontWeight.w400,
                           color: Color(0xff898A8D),
                           fontSize: 18,
                         ),
@@ -184,7 +94,14 @@ class MyPage extends StatelessWidget {
               child: Column(
                 children: [
                   ListTile(
-                    title: const Text('정보 변경'),
+                    title: const Text(
+                      '정보 변경',
+                      style: TextStyle(
+                        fontFamily: 'Pretendard',
+                        fontSize: 16,
+                        color: Color(0xff898A8D),
+                      ),
+                    ),
                     trailing: const Icon(
                       Icons.arrow_forward_ios,
                       size: 16,
@@ -201,7 +118,11 @@ class MyPage extends StatelessWidget {
                   ListTile(
                     title: const Text(
                       '로그아웃',
-                      style: TextStyle(color: Color(0xffFF7D7D)),
+                      style: TextStyle(
+                        color: Color(0xffFF7D7D),
+                        fontFamily: 'Pretendard',
+                        fontSize: 16,
+                      ),
                     ),
                     onTap: () {
                       Navigator.pushReplacement(
