@@ -1,5 +1,4 @@
 import 'package:bab_babbab_front/screens/information/selectPage.dart';
-import 'package:bab_babbab_front/screens/mypage/mypageChange.dart';
 import 'package:bab_babbab_front/service/api_service.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -325,30 +324,6 @@ class _MyPageState extends State<MyPage> {
                   ),
                   child: Column(
                     children: [
-                      ListTile(
-                        title: const Text(
-                          '정보 변경',
-                          style: TextStyle(
-                            fontFamily: 'Pretendard',
-                            fontSize: 16,
-                            color: Color(0xff898A8D),
-                          ),
-                        ),
-                        trailing: const Icon(
-                          Icons.arrow_forward_ios,
-                          size: 16,
-                          color: Color(0xffB9BBB9),
-                        ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MypageChange(),
-                            ),
-                          );
-                        },
-                        textColor: Color(0xff898A8D),
-                      ),
                       ListTile(
                         title: const Text(
                           '로그아웃',
