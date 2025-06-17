@@ -252,7 +252,6 @@ class _PostsPageState extends State<PostsPage> {
               ],
             ),
             const SizedBox(height: 10),
-            // 🔥 게시물 미리보기 (PostWidget 사용)
             Expanded(
               child:
                   _isLoadingPosts

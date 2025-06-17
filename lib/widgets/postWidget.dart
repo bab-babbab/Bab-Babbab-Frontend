@@ -6,8 +6,8 @@ class PostWidget extends StatelessWidget {
   final String userGrade;
   final String statusMessage;
   final bool isTopPost;
-  final int imageCount; // 이미지 개수
-  final List<String>? imageUrls; // 🔥 실제 이미지 URL 리스트 추가
+  final int imageCount; 
+  final List<String>? imageUrls;
   final VoidCallback? onDetailTap;
 
   const PostWidget({
@@ -16,13 +16,12 @@ class PostWidget extends StatelessWidget {
     required this.userGrade,
     required this.statusMessage,
     this.isTopPost = false,
-    this.imageCount = 0, // 기본값 0개
-    this.imageUrls, // 🔥 이미지 URL 리스트 추가
+    this.imageCount = 0, 
+    this.imageUrls,
     this.onDetailTap,
   });
 
   Widget _buildImageWidget(int index) {
-    // 🔥 실제 이미지 URL이 있으면 네트워크 이미지 표시, 없으면 더미 이미지
     if (imageUrls != null && index < imageUrls!.length) {
       return Container(
         width: 90,
@@ -34,7 +33,6 @@ class PostWidget extends StatelessWidget {
             imageUrls![index],
             fit: BoxFit.cover,
             errorBuilder: (context, error, stackTrace) {
-              // 이미지 로딩 실패시 더미 이미지 표시
               return Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(8),
@@ -67,7 +65,6 @@ class PostWidget extends StatelessWidget {
         ),
       );
     } else {
-      // 더미 이미지 (회색 컨테이너)
       return Container(
         width: 90,
         height: 75,
@@ -144,7 +141,6 @@ class PostWidget extends StatelessWidget {
             ),
             SizedBox(height: 8),
 
-            // 제목 (한 줄만 표시, 넘치면 ... 처리)
             Text(
               statusMessage,
               style: TextStyle(
@@ -157,7 +153,6 @@ class PostWidget extends StatelessWidget {
             ),
             SizedBox(height: 15),
 
-            // 이미지들 (실제 이미지 또는 더미 이미지)
             if (imageCount > 0)
               Wrap(
                 spacing: 10,
