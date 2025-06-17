@@ -51,7 +51,12 @@ class _PostsPageState extends State<PostsPage> {
 
       final postsData = await ApiService.getPosts();
       final userModel = Provider.of<UserModel>(context, listen: false);
-
+      postsData.sort((a, b) {
+        return DateTime.parse(
+          b['created_at'],
+        ).compareTo(DateTime.parse(a['created_at']));
+      });
+      
       List<Map<String, dynamic>> postsWithUserInfo = [];
       final recentPostsData = postsData.take(3).toList();
 
