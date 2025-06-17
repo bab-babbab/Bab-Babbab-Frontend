@@ -234,15 +234,58 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text("작성 완료"),
-            content: const Text("사진이 정상적으로 업로드되었습니다."),
+            shape: RoundedRectangleBorder(
+              // 둥근 테두리
+              borderRadius: BorderRadius.circular(20),
+            ),
+            elevation: 10, // 그림자 깊이
+            backgroundColor: Colors.white,
+            title: const Text(
+              "작성 완료",
+              style: TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            content: const Text(
+              "사진이 정상적으로 업로드되었습니다.",
+              style: TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 16,
+                color: Colors.black87,
+              ),
+            ),
+            actionsPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 20,
+            ),
+
             actions: [
               TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: const Color(0xffFFAA00),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                ),
                 onPressed: () {
                   Navigator.pop(context);
                   Navigator.pop(context);
                 },
-                child: const Text("확인"),
+                child: const Text(
+                  "확인",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Pretendard',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
@@ -254,12 +297,53 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
       context: context,
       builder:
           (context) => AlertDialog(
-            title: const Text("업로드 실패"),
-            content: Text(message),
+            shape: RoundedRectangleBorder(
+              // 둥근 테두리
+              borderRadius: BorderRadius.circular(20),
+            ),
+            elevation: 10, // 그림자 깊이
+            backgroundColor: Colors.white,
+            title: const Text(
+              "업로드 실패",
+              style: TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black,
+              ),
+            ),
+            content: Text(
+              message,
+              style: TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 16,
+                color: Colors.black87,
+              ),
+            ),
             actions: [
               TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("확인"),
+                style: TextButton.styleFrom(
+                  backgroundColor: const Color(0xffFFAA00),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20,
+                    vertical: 10,
+                  ),
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                  Navigator.pop(context);
+                },
+                child: const Text(
+                  "확인",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Pretendard',
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
               ),
             ],
           ),
