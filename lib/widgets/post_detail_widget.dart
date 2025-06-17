@@ -867,7 +867,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
           children: [
             Icon(Icons.account_circle, size: 28, color: Colors.grey),
             SizedBox(width: 14),
-            Container(
+            SizedBox(
               width: 200,
               child: TextField(
                 controller: _commentController,

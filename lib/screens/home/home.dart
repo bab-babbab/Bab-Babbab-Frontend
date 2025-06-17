@@ -269,7 +269,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
             ),
             child: Center(
               child: Text(
-                '${user.message}',
+                user.message,
                 style: TextStyle(
                   fontFamily: 'Pretendard',
                   fontSize: 18,

@@ -108,7 +108,7 @@ class _FoodBoardPageState extends State<FoodBoardPage> {
                     ),
                     child: Center(
                       child: Text(
-                        '${user.message}',
+                        user.message,
                         style: TextStyle(
                           fontFamily: 'Pretendard',
                           fontSize: 18,

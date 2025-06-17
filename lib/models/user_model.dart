@@ -5,7 +5,7 @@ class UserModel extends ChangeNotifier {
   String _name = '';
   String _message = '';
   String _school = '';
-  String _grade = ''; 
+  String _grade = '';
   String _class = '';
 
   String get id => _id;
@@ -13,13 +13,13 @@ class UserModel extends ChangeNotifier {
   String get message => _message;
   String get school => _school;
   String get grade => _grade;
-  String get class_ => _class; 
+  String get class_ => _class;
 
   String get gradeClass {
     if (_grade.isNotEmpty && _class.isNotEmpty) {
       return '${_grade}학년/${_class}반';
     } else {
-      return '0학년/0반'; 
+      return '0학년/0반';
     }
   }
 
@@ -28,7 +28,7 @@ class UserModel extends ChangeNotifier {
     required String name,
     required String message,
     required String school,
-    String grade = '', 
+    String grade = '',
     String class_ = '',
   }) {
     _id = id;
@@ -36,7 +36,7 @@ class UserModel extends ChangeNotifier {
     _message = message;
     _school = school;
     _grade = grade;
-    _class = class_; 
+    _class = class_;
     notifyListeners();
   }
 
@@ -45,7 +45,7 @@ class UserModel extends ChangeNotifier {
     _name = '';
     _message = '';
     _school = '';
-    _grade = ''; 
+    _grade = '';
     _class = '';
     notifyListeners();
   }
