@@ -36,7 +36,8 @@ class _FoodBoardPageState extends State<FoodBoardPage> {
   }
 
   Future<Map<String, dynamic>> loadMeal() async {
-    final school = await MealService.getSchoolInfo('미림마이스터고등학교');
+    final user = Provider.of<UserModel>(context, listen: false);
+    final school = await MealService.getSchoolInfo(user.school);
 
     if (school == null ||
         school['eduOfficeCode'] == null ||
