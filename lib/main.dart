@@ -1,4 +1,5 @@
 import 'package:bab_babbab_front/screens/information/selectPage.dart';
+import 'package:bab_babbab_front/screens/posts/create_post.dart';
 import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/firebase_options.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -37,7 +38,11 @@ class MainApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'bab-babbab',
 
+<<<<<<< HEAD
+      home: ImageUploadScreen(),
+=======
       home: SelectPage(),
+>>>>>>> feb2db65cacd1cfcff58e868284561556207e4a4
     );
   }
 }
