@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/widgets/postWidget.dart';
-import 'package:bab_babbab_front/widgets/post_detail_widget.dart'; // PostDetailWidget import로 변경
+import 'package:bab_babbab_front/widgets/post_detail_widget.dart';
 import 'dart:io';
 
-// PostsPage 위젯
 class PostsPage extends StatefulWidget {
   const PostsPage({super.key});
 
@@ -12,7 +11,6 @@ class PostsPage extends StatefulWidget {
 }
 
 class _PostsPageState extends State<PostsPage> {
-  // 각 게시물별 이미지 데이터를 저장할 Map
   Map<int, List<File>> _postImages = {};
 
   @override
@@ -39,9 +37,9 @@ class _PostsPageState extends State<PostsPage> {
         ),
       ),
       body: Container(
-        color: Color(0xFFF7F8F9), // 배경색 설정
+        color: Color(0xFFF7F8F9),
         child: Padding(
-          padding: EdgeInsets.only(top: 20), // 원하는 간격 추가
+          padding: EdgeInsets.only(top: 20),
           child: ListView.builder(
             padding: EdgeInsets.all(20),
             itemCount: 4,
@@ -50,29 +48,22 @@ class _PostsPageState extends State<PostsPage> {
                 userName: _getUserName(index),
                 userGrade: _getUserGrade(index),
                 statusMessage: _getStatusMessage(index),
-                isTopPost: index == 0, // 첫 번째 게시물만 상단 게시물로 설정
+                isTopPost: index == 0,
                 imageCount: 2,
-                // initialImages: _postImages[index], // 해당 게시물의 이미지 전달
                 onDetailTap: () {
-                  // PostDetailWidget으로 이동하면서 이미지 데이터 전달
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder:
                           (context) => PostDetailWidget(
-                            selectedImages:
-                                _postImages[index], // 해당 게시물의 이미지 전달
-                            postData: _getPostData(index), // 게시물 데이터도 전달
+                            selectedImages: _postImages[index],
+                            postData: _getPostData(index),
+                            postId: _getPostId(index), 
+                            greyContainerCount: 2,
                           ),
                     ),
                   );
                 },
-                // onImagesChanged: (images) {
-                //   // PostWidget에서 이미지가 변경될 때 콜백
-                //   setState(() {
-                //     _postImages[index] = images;
-                //   });
-                // },
               );
             },
           ),
@@ -81,17 +72,21 @@ class _PostsPageState extends State<PostsPage> {
     );
   }
 
-  // 게시물 데이터를 Map으로 전달 (PostDetailWidget에서 사용할 추가 정보)
+  String _getPostId(int index) {
+    final postIds = ['post_001', 'post_002', 'post_003', 'post_004'];
+    return postIds[index % postIds.length];
+  }
+
   Map<String, dynamic> _getPostData(int index) {
     return {
       'userName': _getUserName(index),
       'userGrade': _getUserGrade(index),
       'statusMessage': _getStatusMessage(index),
       'timestamp': _getTimestamp(index),
+      'postId': _getPostId(index),
     };
   }
 
-  // 더미 데이터 함수들 (실제로는 서버에서 받아올 데이터)
   String _getUserName(int index) {
     final names = ['정수진', '김철수', '박영희', '이민수'];
     return names[index % names.length];

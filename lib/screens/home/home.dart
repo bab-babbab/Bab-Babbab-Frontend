@@ -1,3 +1,4 @@
+import 'package:bab_babbab_front/screens/posts/create_post.dart';
 import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/screens/home/environment_news.dart';
 import 'package:bab_babbab_front/widgets/bottom_nav_bar.dart';
@@ -5,9 +6,9 @@ import 'package:bab_babbab_front/screens/ranking/ranking.dart';
 import 'package:bab_babbab_front/screens/home/foodBoardPage.dart';
 import 'package:bab_babbab_front/screens/posts/postsPage.dart';
 import 'package:bab_babbab_front/screens/mypage/mypage.dart';
-import 'package:http/http.dart' as http;
 import 'package:provider/provider.dart';
 import 'package:bab_babbab_front/models/user_model.dart';
+import 'package:bab_babbab_front/service/api_service.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -17,24 +18,47 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  final pages = [
-    _HomeMainContent(userId: 'user-123'),
-    PostsMainPage(),
-    RankingPage(),
-    MyPage(),
-  ];
+  late List<Widget> _pages;
+
+  @override
+  void initState() {
+    super.initState();
+    _pages = [
+      _HomeMainContent(
+        onGoToRanking: () {
+          setState(() {
+            _selectedIndex = 2;
+          });
+        },
+      ),
+      PostsPage(),
+      RankingPage(),
+      MyPage(),
+    ];
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffF7F8F9),
-      body: pages[_selectedIndex],
+      body: _pages[_selectedIndex],
       bottomNavigationBar: CustomBottomNav(
         currentIndex: _selectedIndex,
         onTap: (i) => setState(() => _selectedIndex = i),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => ImageUploadScreen()),
+          );
+        },
         child: const Icon(Icons.add, color: Colors.white),
         elevation: 0,
         backgroundColor: Color(0xffFFAD0A),
@@ -45,31 +69,26 @@ class _HomePageState extends State<HomePage> {
 }
 
 class _HomeMainContent extends StatefulWidget {
-  final String userId;
-  const _HomeMainContent({super.key, required this.userId});
+  final VoidCallback onGoToRanking;
 
+  const _HomeMainContent({super.key, required this.onGoToRanking});
   @override
   State<_HomeMainContent> createState() => _HomeMainContentState();
 }
 
 class _HomeMainContentState extends State<_HomeMainContent> {
   late Future<int> streakCount;
+  late String userId;
+  bool _initialized = false;
 
   @override
-  void initState() {
-    super.initState();
-    streakCount = fetchStreakCount();
-  }
-
-  Future<int> fetchStreakCount() async {
-    final response = await http.get(
-      Uri.parse('http://localhost:3000/stats/sequence/${widget.userId}'),
-    );
-
-    if (response.statusCode == 200) {
-      return int.parse(response.body);
-    } else {
-      throw Exception('연속 일수 가져오기 실패함');
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      final user = Provider.of<UserModel>(context);
+      userId = user.id;
+      streakCount = ApiService.fetchStreakCount(userId);
+      _initialized = true;
     }
   }
 
@@ -202,7 +221,11 @@ class _HomeMainContentState extends State<_HomeMainContent> {
                     borderRadius: BorderRadius.circular(16),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
-                      onTap: () {},
+                      onTap: () {
+                        if (widget.onGoToRanking != null) {
+                          widget.onGoToRanking();
+                        }
+                      },
                       child: Container(
                         width: containerWidth / 2 - 7,
                         height: 96,
@@ -246,7 +269,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
             ),
             child: Center(
               child: Text(
-                '${user.message}',
+                user.message,
                 style: TextStyle(
                   fontFamily: 'Pretendard',
                   fontSize: 18,

@@ -1,32 +1,219 @@
 import 'package:flutter/material.dart';
-import 'package:bab_babbab_front/widgets/postWidget.dart';
+import 'package:provider/provider.dart';
+import 'package:bab_babbab_front/models/user_model.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 import 'dart:io';
 
 // 댓글 데이터 모델
 class Comment {
+  final String userId;
   final String userName;
   final String userClass;
   final String timestamp;
   final String content;
 
   Comment({
+    required this.userId,
     required this.userName,
     required this.userClass,
     required this.timestamp,
     required this.content,
   });
+
+  // JSON에서 Comment 객체 생성 (서버 응답용)
+  factory Comment.fromJson(Map<String, dynamic> json) {
+    return Comment(
+      userId: json['user_id'] ?? '',
+      userName: json['user_name'] ?? '',
+      userClass: json['user_class'] ?? '',
+      timestamp: json['timestamp'] ?? '',
+      content: json['reply'] ?? '',
+    );
+  }
 }
 
+// 댓글 API 서비스
+class CommentService {
+  static const String baseUrl = 'http://3.34.122.170:3000'; // 🔥 실제 서버 URL
+
+  // 🔥 댓글 작성 API - POST /posts/:id/replys
+  static Future<bool> addComment({
+    required String postId,
+    required String userId,
+    required String reply,
+  }) async {
+    try {
+      final url = '$baseUrl/posts/$postId/replys';
+      final requestData = {'user_id': userId, 'reply': reply};
+
+      debugPrint('🔥 댓글 작성 API 호출');
+      debugPrint('🔥 URL: $url');
+      debugPrint('🔥 요청 데이터: ${jsonEncode(requestData)}');
+
+      final response = await http.post(
+        Uri.parse(url),
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+        },
+        body: jsonEncode(requestData),
+      );
+
+      debugPrint('📡 서버 응답 코드: ${response.statusCode}');
+      debugPrint('📡 응답 내용: ${response.body}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        debugPrint('✅ 댓글 작성 성공!');
+        return true;
+      } else {
+        debugPrint('❌ 댓글 작성 실패 - 상태 코드: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('❌ 댓글 작성 네트워크 오류: $e');
+      return false;
+    }
+  }
+
+  // 댓글 목록 가져오기 API
+  static Future<List<Comment>> getComments(String postId) async {
+    try {
+      debugPrint('댓글 목록 요청: postId=$postId');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/posts/$postId/replys'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      debugPrint('댓글 목록 응답: ${response.statusCode}');
+      debugPrint('댓글 목록 응답 내용: ${response.body}');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> jsonList = jsonDecode(response.body);
+        List<Comment> comments = [];
+
+        // 🔥 각 댓글에 대해 사용자 정보를 가져와서 Comment 객체 생성
+        for (var commentJson in jsonList) {
+          String userId = commentJson['user_id'] ?? '';
+          String reply = commentJson['reply'] ?? '';
+          String timestamp = commentJson['created_at'] ?? '';
+
+          // 🔥 사용자 정보 가져오기
+          Map<String, String> userInfo = await PostDetailService.getUserInfo(
+            userId,
+          );
+
+          Comment comment = Comment(
+            userId: userId,
+            userName: userInfo['name']!,
+            userClass: '${userInfo['grade']}학년/${userInfo['class']}반',
+            timestamp: _formatTimestamp(timestamp), // 🔥 시간 포맷팅
+            content: reply,
+          );
+
+          comments.add(comment);
+        }
+
+        return comments;
+      }
+      return [];
+    } catch (e) {
+      debugPrint('댓글 불러오기 오류: $e');
+      return [];
+    }
+  }
+
+  // 🔥 댓글 시간 포맷팅 함수 수정 (날짜만 표시)
+  static String _formatTimestamp(String isoString) {
+    try {
+      DateTime dateTime = DateTime.parse(isoString);
+
+      // 🔥 UTC 시간을 로컬 시간으로 변환
+      dateTime = dateTime.toLocal();
+
+      String year = dateTime.year.toString();
+      String month = dateTime.month.toString().padLeft(2, '0');
+      String day = dateTime.day.toString().padLeft(2, '0');
+
+      return '$year-$month-$day'; // 🔥 날짜만 반환 (YYYY-MM-DD 형식)
+    } catch (e) {
+      debugPrint('시간 포맷팅 오류: $e');
+      return '날짜 정보 없음';
+    }
+  }
+}
+
+// 🔥 게시물 상세 API 서비스
+class PostDetailService {
+  static const String baseUrl = 'http://3.34.122.170:3000';
+
+  // GET "/posts/:id" - 게시물 상세 조회
+  static Future<Map<String, dynamic>?> getPostDetail(String postId) async {
+    try {
+      debugPrint('🔍 게시물 상세 조회: postId=$postId');
+
+      final response = await http.get(
+        Uri.parse('$baseUrl/posts/$postId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      debugPrint('📡 게시물 상세 응답: ${response.statusCode}');
+
+      if (response.statusCode == 200) {
+        final postData = jsonDecode(response.body);
+        debugPrint('✅ 게시물 상세 조회 성공!');
+        return postData;
+      } else {
+        debugPrint('❌ 게시물 상세 조회 실패: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('❌ 게시물 상세 조회 오류: $e');
+      return null;
+    }
+  }
+
+  // 🔥 user_id로 사용자 정보 가져오기
+  static Future<Map<String, String>> getUserInfo(String userId) async {
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/home/user/$userId'),
+        headers: {'Content-Type': 'application/json'},
+      );
+
+      if (response.statusCode == 200) {
+        final responseData = json.decode(response.body);
+        final userInfo = responseData['userInfo'];
+        final schoolInfo = responseData['schoolInfo'];
+
+        String name = userInfo['name'] ?? '사용자';
+        String grade = schoolInfo['grade']?.toString() ?? '0';
+        String classNum = schoolInfo['class']?.toString() ?? '0';
+
+        return {'name': name, 'grade': grade, 'class': classNum};
+      }
+    } catch (e) {
+      debugPrint('❌ 사용자 정보 가져오기 오류: $e');
+    }
+
+    return {'name': '사용자', 'grade': '0', 'class': '0'};
+  }
+}
+
+// 게시물 상세 위젯
 class PostDetailWidget extends StatefulWidget {
-  final List<File>? selectedImages;
-  final Map<String, dynamic>? postData;
-  final int greyContainerCount; // 회색 컨테이너 개수 추가
+  final List<File>? selectedImages; // 게시물 이미지들 (로컬)
+  final Map<String, dynamic>? postData; // 게시물 데이터
+  final int greyContainerCount; // 회색 박스 개수
+  final String? postId; // 🔥 게시물 ID (API 호출용)
 
   const PostDetailWidget({
     super.key,
     this.selectedImages,
     this.postData,
-    this.greyContainerCount = 3, // 기본값 3개
+    this.greyContainerCount = 3,
+    this.postId,
   });
 
   @override
@@ -34,68 +221,240 @@ class PostDetailWidget extends StatefulWidget {
 }
 
 class PostDetailWidgetState extends State<PostDetailWidget> {
+  // 컨트롤러들
   final TextEditingController _commentController = TextEditingController();
   final PageController _pageController = PageController();
+
+  // 상태 변수들
   int _currentImageIndex = 0;
+  List<Comment> _comments = [];
+  bool _isLoading = false;
+  bool _isLoadingPost = true;
 
-  // 샘플 댓글 데이터
-  List<Comment> _comments = [
-    Comment(
-      userName: "김수지",
-      userClass: "2학년/3반",
-      timestamp: "2024.02.01 오후 8:43",
-      content: "오늘도 수고 많았습니다!! 선배 존경합니다!",
-    ),
-    Comment(
-      userName: "박지훈",
-      userClass: "2학년/1반",
-      timestamp: "2024.02.01 오후 8:45",
-      content: "정말 열심히 하시네요! 항상 응원합니다!",
-    ),
-    Comment(
-      userName: "양혜원",
-      userClass: "3학년/2반",
-      timestamp: "2024.02.15 오후 18:45",
-      content: "너 정말 열심히 한다. 힘내.",
-    ),
-    Comment(
-      userName: "김지혜",
-      userClass: "2학년/1반",
-      timestamp: "2024.08.21 오후 8:21",
-      content: "상미의 생일에 이러한 것을 실천 하다니 정말 좋아",
-    ),
-  ];
+  // 🔥 게시물 상세 정보
+  Map<String, dynamic>? _postDetail;
+  List<String> _imageUrls = [];
+  String _postUserName = '';
+  String _postUserGrade = '';
 
-  // 현재 시간을 포맷팅하는 함수
-  String _getCurrentTimestamp() {
-    final now = DateTime.now();
-    final hour =
-        now.hour > 12
-            ? now.hour - 12
-            : now.hour == 0
-            ? 12
-            : now.hour;
-    final period = now.hour >= 12 ? '오후' : '오전';
-    final minute = now.minute.toString().padLeft(2, '0');
-
-    return "${now.year}.${now.month.toString().padLeft(2, '0')}.${now.day.toString().padLeft(2, '0')} $period $hour:$minute";
+  @override
+  void initState() {
+    super.initState();
+    _loadPostDetail(); // 🔥 게시물 상세 정보 로드
+    _loadComments(); // 댓글 불러오기
   }
 
-  // 댓글 추가 함수
-  void _addComment() {
-    String commentText = _commentController.text.trim();
-    if (commentText.isNotEmpty) {
+  // 🔥 게시물 상세 정보 로드
+  Future<void> _loadPostDetail() async {
+    if (widget.postId != null) {
+      setState(() => _isLoadingPost = true);
+
+      // 게시물 상세 정보 가져오기
+      final postDetail = await PostDetailService.getPostDetail(widget.postId!);
+
+      if (postDetail != null) {
+        setState(() {
+          _postDetail = postDetail;
+        });
+
+        // 이미지 URL 추출
+        _extractImageUrls(postDetail);
+
+        // 사용자 정보 가져오기
+        await _loadUserInfo(postDetail['user_id']);
+      }
+
+      setState(() => _isLoadingPost = false);
+    } else {
+      setState(() => _isLoadingPost = false);
+    }
+  }
+
+  // 🔥 이미지 URL 추출
+  void _extractImageUrls(Map<String, dynamic> postDetail) {
+    List<String> urls = [];
+
+    if (postDetail['photo_b'] != null &&
+        postDetail['photo_b'].toString().isNotEmpty) {
+      urls.add(postDetail['photo_b'].toString());
+    }
+    if (postDetail['photo_l'] != null &&
+        postDetail['photo_l'].toString().isNotEmpty) {
+      urls.add(postDetail['photo_l'].toString());
+    }
+    if (postDetail['photo_d'] != null &&
+        postDetail['photo_d'].toString().isNotEmpty) {
+      urls.add(postDetail['photo_d'].toString());
+    }
+
+    setState(() {
+      _imageUrls = urls;
+    });
+  }
+
+  // 🔥 게시물 타임스탬프 포맷팅 함수 수정 (날짜만 YYYY-MM-DD 형식)
+  String _formatPostTimestamp(String isoString) {
+    try {
+      DateTime dateTime = DateTime.parse(isoString);
+
+      // 🔥 UTC 시간을 로컬 시간으로 변환
+      dateTime = dateTime.toLocal();
+
+      String year = dateTime.year.toString();
+      String month = dateTime.month.toString().padLeft(2, '0');
+      String day = dateTime.day.toString().padLeft(2, '0');
+
+      return '$year-$month-$day'; // 🔥 YYYY-MM-DD 형태로만 반환
+    } catch (e) {
+      debugPrint('게시물 시간 포맷팅 오류: $e');
+      return '날짜 정보 없음';
+    }
+  }
+
+  Future<void> _loadUserInfo(String userId) async {
+    final userModel = Provider.of<UserModel>(context, listen: false);
+
+    if (userId == userModel.id) {
+      // 현재 로그인한 사용자
       setState(() {
-        _comments.add(
-          Comment(
-            userName: "정상미",
-            userClass: "3학년/4반",
-            timestamp: _getCurrentTimestamp(),
-            content: commentText,
-          ),
-        );
+        _postUserName = userModel.name;
+        _postUserGrade = userModel.gradeClass;
       });
-      _commentController.clear();
+    } else {
+      // 다른 사용자 정보 가져오기
+      final userInfo = await PostDetailService.getUserInfo(userId);
+      setState(() {
+        _postUserName = userInfo['name']!;
+        _postUserGrade = '${userInfo['grade']}학년/${userInfo['class']}반';
+      });
+    }
+  }
+
+  // 댓글 불러오기 함수
+  Future<void> _loadComments() async {
+    if (widget.postId != null) {
+      setState(() => _isLoading = true);
+
+      final comments = await CommentService.getComments(widget.postId!);
+      setState(() {
+        _comments = comments;
+        _isLoading = false;
+      });
+    } else {
+      // 샘플 댓글 (postId가 없을 때만)
+      _comments = [
+        Comment(
+          userId: "sample_user_1",
+          userName: "김수지",
+          userClass: "2학년/3반",
+          timestamp: "2024-02-01",
+          content: "오늘도 수고 많았습니다!! 선배 존경합니다!",
+        ),
+        Comment(
+          userId: "sample_user_2",
+          userName: "박지훈",
+          userClass: "2학년/1반",
+          timestamp: "2024-02-01",
+          content: "정말 열심히 하시네요! 항상 응원합니다!",
+        ),
+      ];
+      setState(() => _isLoading = false);
+    }
+  }
+
+  // 🔥 댓글 작성 시 현재 날짜 포맷팅 (날짜만)
+  String _getCurrentTimestamp() {
+    final now = DateTime.now(); // 🔥 이미 로컬 시간
+
+    String year = now.year.toString();
+    String month = now.month.toString().padLeft(2, '0');
+    String day = now.day.toString().padLeft(2, '0');
+
+    return '$year-$month-$day'; // 🔥 날짜만 반환 (YYYY-MM-DD 형식)
+  }
+
+  // 🔥 댓글 작성 함수
+  Future<void> _addComment() async {
+    String commentText = _commentController.text.trim();
+    if (commentText.isEmpty) return;
+
+    final userModel = Provider.of<UserModel>(context, listen: false);
+
+    if (userModel.id.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('로그인이 필요합니다! 😅'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    bool success = false;
+
+    if (widget.postId != null) {
+      success = await CommentService.addComment(
+        postId: widget.postId!,
+        userId: userModel.id,
+        reply: commentText,
+      );
+
+      // 🔥 댓글 작성 성공 시 댓글 목록 다시 불러오기 (서버 시간으로 통일)
+      if (success) {
+        await _loadComments(); // 서버에서 최신 댓글 목록을 다시 가져옴
+        _commentController.clear();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('댓글이 작성되었습니다! 🎉'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    } else {
+      // 🔥 오프라인 모드 (샘플 데이터)
+      await Future.delayed(Duration(milliseconds: 500));
+      success = true;
+
+      if (success) {
+        final newComment = Comment(
+          userId: userModel.id,
+          userName: userModel.name.isNotEmpty ? userModel.name : "사용자",
+          userClass: userModel.gradeClass,
+          timestamp: _getCurrentTimestamp(),
+          content: commentText,
+        );
+
+        setState(() {
+          _comments.add(newComment);
+        });
+
+        _commentController.clear();
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('댓글이 작성되었습니다! 🎉'),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      }
+    }
+
+    setState(() => _isLoading = false);
+
+    if (!success && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('댓글 작성에 실패했습니다. 다시 시도해주세요. 😞'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -108,24 +467,99 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
 
   @override
   Widget build(BuildContext context) {
-    // 기본 게시물 데이터
-    final userName = widget.postData?['userName'] ?? '정수진';
-    final userGrade = widget.postData?['userGrade'] ?? '3학년 / 2반';
-    final statusMessage = widget.postData?['statusMessage'] ?? '오늘 인증!';
-    final timestamp = widget.postData?['timestamp'] ?? '2024.02.01 오후 8:43';
+    final userModel = Provider.of<UserModel>(context);
 
-    // 이미지 위젯들 생성
+    // 🔥 게시물 데이터 (API에서 가져온 데이터 우선 사용)
+    final userName =
+        _postUserName.isNotEmpty
+            ? _postUserName
+            : (widget.postData?['userName'] ?? '정수진');
+    final userGrade =
+        _postUserGrade.isNotEmpty
+            ? _postUserGrade
+            : (widget.postData?['userGrade'] ?? '3학년 / 2반');
+    final statusMessage =
+        _postDetail?['comment'] ??
+        widget.postData?['statusMessage'] ??
+        '오늘 인증!';
+
+    // 🔥 게시물 날짜만 표시 (YYYY-MM-DD 형식)
+    final timestamp =
+        _postDetail?['created_at'] != null
+            ? _formatPostTimestamp(_postDetail!['created_at'])
+            : (widget.postData?['timestamp'] ?? '2024-02-01');
+
+    // 🔥 이미지 위젯 생성 (서버 이미지 우선, 그 다음 로컬 이미지)
     List<Widget> imageWidgets = [];
 
-    // 실제 이미지가 있는지 확인
-    bool hasRealImages =
-        widget.selectedImages != null && widget.selectedImages!.isNotEmpty;
-
-    if (hasRealImages) {
-      // 이미지가 있을 때: 실제 이미지들만 표시 (최대 3개까지)
+    if (_imageUrls.isNotEmpty) {
+      // 🔥 서버 이미지 (스와이프 가능)
+      for (int i = 0; i < _imageUrls.length; i++) {
+        imageWidgets.add(
+          Container(
+            decoration: BoxDecoration(borderRadius: BorderRadius.circular(10)),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: Image.network(
+                _imageUrls[i],
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Color(0xFFE0E0E0),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        value:
+                            loadingProgress.expectedTotalBytes != null
+                                ? loadingProgress.cumulativeBytesLoaded /
+                                    loadingProgress.expectedTotalBytes!
+                                : null,
+                        strokeWidth: 2,
+                        color: Color(0xFFFFB800),
+                      ),
+                    ),
+                  );
+                },
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    decoration: BoxDecoration(
+                      color: Color(0xFFC4C4C4),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.broken_image,
+                            size: 60,
+                            color: Colors.white,
+                          ),
+                          SizedBox(height: 8),
+                          Text(
+                            '이미지 로딩 실패',
+                            style: TextStyle(color: Colors.white),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      }
+    } else if (widget.selectedImages != null &&
+        widget.selectedImages!.isNotEmpty) {
+      // 🔥 로컬 이미지 (스와이프 가능)
       int imagesToAdd =
           widget.selectedImages!.length > 3 ? 3 : widget.selectedImages!.length;
-
       for (int i = 0; i < imagesToAdd; i++) {
         imageWidgets.add(
           Container(
@@ -158,7 +592,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
         );
       }
     } else {
-      // 이미지가 없을 때: PostWidget에서 전달받은 개수만큼 회색 박스 생성 (스와이프 가능)
+      // 🔥 회색 박스 (스와이프 가능)
       for (int i = 0; i < widget.greyContainerCount; i++) {
         imageWidgets.add(
           Container(
@@ -191,7 +625,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text(
+        title: Text(
           "게시물",
           style: TextStyle(
             color: Color(0xFF575757),
@@ -203,188 +637,225 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
         elevation: 0,
         centerTitle: true,
         scrolledUnderElevation: 0,
-        shape: const Border(
-          bottom: BorderSide(color: Color(0xFFD7D7D7), width: 1),
-        ),
+        shape: Border(bottom: BorderSide(color: Color(0xFFD7D7D7), width: 1)),
         leading: IconButton(
-          icon: const Icon(
-            Icons.chevron_left,
-            color: Color(0xFFD1D2D1),
-            size: 35,
-          ),
+          icon: Icon(Icons.chevron_left, color: Color(0xFFD1D2D1), size: 35),
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: SingleChildScrollView(
-        child: Container(
-          color: Colors.white,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(16),
+      body:
+          _isLoadingPost
+              ? Center(
                 child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    // 게시물 제목
+                    CircularProgressIndicator(color: Color(0xFFFFAD0A)),
+                    SizedBox(height: 16),
                     Text(
-                      statusMessage,
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 이미지 슬라이더
-                    Container(
-                      width: double.infinity,
-                      height: 350,
-                      decoration: BoxDecoration(
-                        color: Color(0xFFC4C4C4),
-                        borderRadius: BorderRadius.circular(10),
-                      ),
-                      child: Stack(
-                        children: [
-                          PageView.builder(
-                            controller: _pageController,
-                            onPageChanged: (index) {
-                              setState(() {
-                                _currentImageIndex = index;
-                              });
-                            },
-                            itemCount: imageWidgets.length,
-                            itemBuilder: (context, index) {
-                              return imageWidgets[index];
-                            },
-                          ),
-                          // 이미지 카운터 (이미지가 2개 이상일 때만 표시)
-                          if (imageWidgets.length > 1)
-                            Positioned(
-                              bottom: 8,
-                              right: 8,
-                              child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: Colors.black.withOpacity(0.5),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  "${_currentImageIndex + 1}/${imageWidgets.length}",
-                                  style: const TextStyle(
-                                    color: Colors.white,
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 20),
-
-                    // 타임스탬프
-                    Text(timestamp, style: TextStyle(color: Colors.grey)),
-                    const SizedBox(height: 20),
-
-                    // 댓글 개수
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 4.0),
-                      child: Text(
-                        '댓글 ${_comments.length}개',
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          height: 1.40,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-
-                    // 댓글 리스트
-                    ListView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _comments.length,
-                      itemBuilder: (context, index) {
-                        final comment = _comments[index];
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 20),
-                          padding: const EdgeInsets.all(30),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(10),
-                            boxShadow: const [
-                              BoxShadow(
-                                color: Color(0x14000000),
-                                blurRadius: 10,
-                                offset: Offset(1, 1),
-                                spreadRadius: 0,
-                              ),
-                            ],
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    comment.userName,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w600,
-                                      color: Color(0xFF6F6F6F),
-                                    ),
-                                  ),
-                                  Text(
-                                    comment.userClass,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      color: Color(0xFFAAAAAA),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 30),
-                                  Text(
-                                    comment.timestamp,
-                                    style: const TextStyle(
-                                      color: Color(0xFFAAAAAA),
-                                      fontWeight: FontWeight.w400,
-                                      fontSize: 14,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 20),
-                              Text(
-                                comment.content,
-                                style: const TextStyle(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
-                          ),
-                        );
-                      },
+                      '게시물을 불러오는 중...',
+                      style: TextStyle(color: Colors.grey),
                     ),
                   ],
                 ),
+              )
+              : SingleChildScrollView(
+                child: Container(
+                  color: Colors.white,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 16),
+                      Container(
+                        padding: EdgeInsets.all(16),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // 🔥 사용자 정보
+                            Row(
+                              children: [
+                                Text(
+                                  '$userName ',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.bold,
+                                    color: Color(0xFF333333),
+                                  ),
+                                ),
+                                Text(
+                                  userGrade,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Color(0xFF999999),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            SizedBox(height: 12),
+
+                            // 🔥 게시물 제목
+                            Text(
+                              statusMessage,
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(height: 20),
+
+                            // 🔥 이미지 슬라이더 (스와이프 가능)
+                            Container(
+                              width: double.infinity,
+                              height: 350,
+                              decoration: BoxDecoration(
+                                color: Color(0xFFC4C4C4),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Stack(
+                                children: [
+                                  PageView.builder(
+                                    controller: _pageController,
+                                    onPageChanged: (index) {
+                                      setState(
+                                        () => _currentImageIndex = index,
+                                      );
+                                    },
+                                    itemCount: imageWidgets.length,
+                                    itemBuilder:
+                                        (context, index) => imageWidgets[index],
+                                  ),
+                                  // 🔥 이미지 카운터 (여러 이미지가 있을 때만 표시)
+                                  if (imageWidgets.length > 1)
+                                    Positioned(
+                                      bottom: 8,
+                                      right: 8,
+                                      child: Container(
+                                        padding: EdgeInsets.symmetric(
+                                          horizontal: 12,
+                                          vertical: 5,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.5),
+                                          borderRadius: BorderRadius.circular(
+                                            8,
+                                          ),
+                                        ),
+                                        child: Text(
+                                          "${_currentImageIndex + 1}/${imageWidgets.length}",
+                                          style: TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 20),
+
+                            // 🔥 타임스탬프 (날짜만 표시)
+                            Text(
+                              timestamp,
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                            SizedBox(height: 20),
+
+                            // 🔥 댓글 개수
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 4.0),
+                              child: Text(
+                                '댓글 ${_comments.length}개',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w700,
+                                  height: 1.40,
+                                ),
+                              ),
+                            ),
+                            SizedBox(height: 14),
+
+                            // 🔥 댓글 리스트
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: NeverScrollableScrollPhysics(),
+                              itemCount: _comments.length,
+                              itemBuilder: (context, index) {
+                                final comment = _comments[index];
+
+                                return Container(
+                                  margin: EdgeInsets.only(bottom: 20),
+                                  padding: EdgeInsets.all(30),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(10),
+                                    boxShadow: [
+                                      BoxShadow(
+                                        color: Color(0x14000000),
+                                        blurRadius: 10,
+                                        offset: Offset(1, 1),
+                                        spreadRadius: 0,
+                                      ),
+                                    ],
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            comment.userName,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                              color: Color(0xFF6F6F6F),
+                                            ),
+                                          ),
+                                          Text(
+                                            comment.userClass,
+                                            style: TextStyle(
+                                              fontWeight: FontWeight.w500,
+                                              color: Color(0xFFAAAAAA),
+                                            ),
+                                          ),
+                                          SizedBox(width: 30),
+                                          Text(
+                                            comment.timestamp,
+                                            style: TextStyle(
+                                              color: Color(0xFFAAAAAA),
+                                              fontWeight: FontWeight.w400,
+                                              fontSize: 14,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      SizedBox(height: 20),
+                                      Text(
+                                        comment.content,
+                                        style: TextStyle(
+                                          fontSize: 15,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ],
-          ),
-        ),
-      ),
       bottomNavigationBar: Container(
         width: double.infinity,
         height: 70,
-        padding: const EdgeInsets.symmetric(vertical: 17),
+        padding: EdgeInsets.symmetric(vertical: 17),
         decoration: ShapeDecoration(
           color: Colors.white,
           shape: RoundedRectangleBorder(
@@ -396,157 +867,56 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
           children: [
             Icon(Icons.account_circle, size: 28, color: Colors.grey),
             SizedBox(width: 14),
-            Container(
+            SizedBox(
               width: 200,
               child: TextField(
                 controller: _commentController,
                 decoration: InputDecoration(
-                  hintText: "댓글 작성하기",
+                  hintText: userModel.id.isEmpty ? "로그인 후 댓글 작성" : "댓글 작성하기",
                   filled: true,
                   fillColor: Colors.white,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(20),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 5),
+                  contentPadding: EdgeInsets.symmetric(vertical: 5),
                 ),
                 onSubmitted: (value) => _addComment(),
+                enabled: !_isLoading && userModel.id.isNotEmpty,
               ),
             ),
             SizedBox(width: 55),
             Transform.translate(
-              offset: const Offset(0, -5),
+              offset: Offset(0, -5),
               child: IconButton(
-                icon: Transform.rotate(
-                  angle: -40 * (3.141592 / 180),
-                  child: Icon(Icons.send, color: Color(0xFFFFAD0A), size: 26),
-                ),
-                onPressed: _addComment,
+                icon:
+                    _isLoading
+                        ? SizedBox(
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2,
+                            color: Color(0xFFFFAD0A),
+                          ),
+                        )
+                        : Transform.rotate(
+                          angle: -40 * (3.141592 / 180),
+                          child: Icon(
+                            Icons.send,
+                            color:
+                                userModel.id.isEmpty
+                                    ? Colors.grey
+                                    : Color(0xFFFFAD0A),
+                            size: 26,
+                          ),
+                        ),
+                onPressed:
+                    _isLoading || userModel.id.isEmpty ? null : _addComment,
               ),
             ),
           ],
         ),
       ),
     );
-  }
-}
-
-// PostsPage 위젯
-class PostsPage extends StatefulWidget {
-  const PostsPage({super.key});
-
-  @override
-  State<PostsPage> createState() => _PostsPageState();
-}
-
-class _PostsPageState extends State<PostsPage> {
-  // 각 게시물별 이미지 데이터를 저장할 Map
-  Map<int, List<File>> _postImages = {};
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      appBar: AppBar(
-        title: Text(
-          "전체 보기",
-          style: TextStyle(
-            color: Color(0xFF575757),
-            fontSize: 19,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        scrolledUnderElevation: 0,
-        elevation: 0,
-        centerTitle: true,
-        shape: Border(bottom: BorderSide(color: Color(0xFFD7D7D7), width: 1)),
-        leading: IconButton(
-          icon: Icon(Icons.chevron_left, color: Color(0xFFD1D2D1), size: 35),
-          onPressed: () => Navigator.pop(context),
-        ),
-      ),
-      body: Container(
-        color: Color(0xFFF7F8F9), // 배경색 설정
-        child: Padding(
-          padding: EdgeInsets.only(top: 20), // 원하는 간격 추가
-          child: ListView.builder(
-            padding: EdgeInsets.all(20),
-            itemCount: 4,
-            itemBuilder: (context, index) {
-              return PostWidget(
-                userName: _getUserName(index),
-                userGrade: _getUserGrade(index),
-                statusMessage: _getStatusMessage(index),
-                isTopPost: index == 0, // 첫 번째 게시물만 상단 게시물로 설정
-                imageCount: 2,
-                // initialImages: _postImages[index], // 해당 게시물의 이미지 전달
-                onDetailTap: () {
-                  // PostDetailWidget으로 이동하면서 이미지 데이터 전달
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => PostDetailWidget(
-                            selectedImages:
-                                _postImages[index], // 해당 게시물의 이미지 전달
-                            postData: _getPostData(index), // 게시물 데이터도 전달
-                          ),
-                    ),
-                  );
-                },
-                // onImagesChanged: (images) {
-                //   // PostWidget에서 이미지가 변경될 때 콜백
-                //   setState(() {
-                //     _postImages[index] = images;
-                //   });
-                // },
-              );
-            },
-          ),
-        ),
-      ),
-    );
-  }
-
-  // 게시물 데이터를 Map으로 전달 (PostDetailWidget에서 사용할 추가 정보)
-  Map<String, dynamic> _getPostData(int index) {
-    return {
-      'userName': _getUserName(index),
-      'userGrade': _getUserGrade(index),
-      'statusMessage': _getStatusMessage(index),
-      'timestamp': _getTimestamp(index),
-    };
-  }
-
-  // 더미 데이터 함수들 (실제로는 서버에서 받아올 데이터)
-  String _getUserName(int index) {
-    final names = ['정수진', '김철수', '박영희', '이민수'];
-    return names[index % names.length];
-  }
-
-  String _getUserGrade(int index) {
-    final grades = ['3학년 / 2반', '2학년 / 1반', '1학년 / 3반', '3학년 / 1반'];
-    return grades[index % grades.length];
-  }
-
-  String _getStatusMessage(int index) {
-    final messages = [
-      '봉사활동 완료! 오늘도 뜻깊은 하루였습니다 🌟',
-      '점심 맛있게 먹었어요! 친구들과 함께해서 더 맛있었음 🍽️',
-      '운동 완료! 10km 달리기 성공했습니다 🏃‍♂️',
-      '숙제 끝! 수학 문제가 어려웠지만 해냈어요 📚',
-    ];
-    return messages[index % messages.length];
-  }
-
-  String _getTimestamp(int index) {
-    final timestamps = [
-      '2024.06.09 오후 3:25',
-      '2024.06.09 오전 12:15',
-      '2024.06.08 오후 6:30',
-      '2024.06.08 오후 9:45',
-    ];
-    return timestamps[index % timestamps.length];
   }
 }

@@ -6,29 +6,8 @@ import 'package:http/http.dart' as http;
 import 'package:dropdown_button2/dropdown_button2.dart';
 import 'package:provider/provider.dart';
 import 'package:bab_babbab_front/models/user_model.dart';
-
-class SchoolInfoDto {
-  final String id;
-  final String schoolName;
-  final int grade;
-  final int classNumber;
-
-  SchoolInfoDto({
-    required this.id,
-    required this.schoolName,
-    required this.grade,
-    required this.classNumber,
-  });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'school_name': schoolName,
-      'grade': grade,
-      'class': classNumber,
-    };
-  }
-}
+import 'package:bab_babbab_front/service/api_service.dart';
+import 'package:bab_babbab_front/models/school_info_dto.dart';
 
 class InformationStuPage extends StatefulWidget {
   final String id;
@@ -115,32 +94,35 @@ class _InformationStuPage extends State<InformationStuPage> {
       classNumber: int.parse(selectedClass!),
     );
 
-    final uri = Uri.parse('http://localhost:3000/user/school-info');
-    final headers = {'Content-Type': 'application/json'};
+    try {
+      final res = await ApiService.submitSchoolInfo(dto);
 
-    final res = await http.post(
-      uri,
-      headers: headers,
-      body: jsonEncode(dto.toJson()),
-    );
+      if (res.statusCode == 200 || res.statusCode == 201) {
+        final userProvider = Provider.of<UserModel>(context, listen: false);
 
-    if (res.statusCode == 200 || res.statusCode == 201) {
-      final userProvider = Provider.of<UserModel>(context, listen: false);
-      userProvider.setUser(
-        id: userProvider.id,
-        name: userProvider.name,
-        message: userProvider.message,
-        school: _schoolController.text.trim(),
-      );
+        userProvider.setUser(
+          id: widget.id,
+          name: widget.name,
+          message:
+              userProvider.message.isNotEmpty ? userProvider.message : "안녕하세요!",
+          school: _schoolController.text.trim(),
+          grade: selectedGrade!,
+          class_: selectedClass!,
+        );
 
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => HomePage()),
-      );
-    } else {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => HomePage()),
+        );
+      } else {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('학교 정보를 저장하는 데 실패했어요.')));
+      }
+    } catch (e) {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text('학교 정보를 저장하는 데 실패했어요.')));
+      ).showSnackBar(const SnackBar(content: Text('오류가 발생했어요. 다시 시도해주세요.')));
     }
   }
 
@@ -153,185 +135,187 @@ class _InformationStuPage extends State<InformationStuPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xffFFFFFF),
-      body: Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 100),
-            Text(
-              "${widget.name}님의 학교\n정보를 작성해주세요.",
-              style: const TextStyle(
-                fontFamily: 'Pretendard',
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-              ),
-            ),
-            const SizedBox(height: 30),
-            TextField(
-              controller: _schoolController,
-              onChanged: (_) {
-                setState(() {
-                  selectedGrade = null;
-                  selectedClass = null;
-                  availableClasses = [];
-                  classList = [];
-                });
-              },
-              decoration: const InputDecoration(
-                fillColor: Color(0xffF8F8F8),
-                filled: true,
-                hintText: '학교를 입력해주세요. 예) 서울고등학교',
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  borderSide: BorderSide(width: 1, color: Color(0xffF8F8F8)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  borderSide: BorderSide(color: Color(0xffF8F8F8)),
-                ),
-              ),
-            ),
-            const SizedBox(height: 30),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                DropdownButton2<String>(
-                  value: selectedGrade,
-                  hint: const Text(
-                    '학년 선택',
-                    style: TextStyle(fontSize: 18, fontFamily: 'Pretendard'),
-                  ),
-                  underline: const SizedBox(),
-                  isExpanded: true,
-                  onChanged: (value) async {
-                    setState(() {
-                      selectedGrade = value;
-                      selectedClass = null;
-                      classList = [];
-                    });
-
-                    if (value != null) {
-                      final fetchedClasses = await fetchClasses();
-                      setState(() {
-                        classList = availableClasses;
-                      });
-                    }
-                  },
-                  items:
-                      gradeList.map((item) {
-                        return DropdownMenuItem<String>(
-                          value: item,
-                          child: Center(
-                            child: Text(
-                              item,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontFamily: 'Pretendard',
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                  buttonStyleData: ButtonStyleData(
-                    height: 60,
-                    width: 150,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: const Color(0xffF8F8F8),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                  ),
-                  dropdownStyleData: DropdownStyleData(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: Colors.white,
-                    ),
-                    elevation: 2,
-                  ),
-                  iconStyleData: const IconStyleData(
-                    icon: Icon(Icons.arrow_drop_down),
-                  ),
-                ),
-                const SizedBox(width: 30),
-                DropdownButton2<String>(
-                  value: selectedClass,
-                  hint: const Text(
-                    '반 선택',
-                    style: TextStyle(fontSize: 18, fontFamily: 'Pretendard'),
-                  ),
-                  underline: const SizedBox(),
-                  isExpanded: true,
-                  onChanged: (value) {
-                    setState(() {
-                      selectedClass = value;
-                    });
-                  },
-                  items:
-                      classList.map((item) {
-                        return DropdownMenuItem<String>(
-                          value: item,
-                          child: Center(
-                            child: Text(
-                              item,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontFamily: 'Pretendard',
-                              ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                  buttonStyleData: ButtonStyleData(
-                    height: 60,
-                    width: 150,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: const Color(0xffF8F8F8),
-                    ),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                  ),
-                  dropdownStyleData: DropdownStyleData(
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(16),
-                      color: Colors.white,
-                    ),
-                    elevation: 2,
-                  ),
-                  iconStyleData: const IconStyleData(
-                    icon: Icon(Icons.arrow_drop_down),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 340),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(336, 60),
-                backgroundColor: const Color(0xffFFAD0A),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-              ),
-              onPressed: () {
-                if (isFormValid) {
-                  submitSchoolInfo();
-                } else {
-                  ScaffoldMessenger.of(
-                    context,
-                  ).showSnackBar(SnackBar(content: Text('모든 항목을 선택해주세요.')));
-                }
-              },
-              child: const Text(
-                '시작하기',
-                style: TextStyle(
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 100),
+              Text(
+                "${widget.name}님의 학교\n정보를 작성해주세요.",
+                style: const TextStyle(
                   fontFamily: 'Pretendard',
-                  fontSize: 20,
-                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
                 ),
               ),
-            ),
-          ],
+              const SizedBox(height: 30),
+              TextField(
+                controller: _schoolController,
+                onChanged: (_) {
+                  setState(() {
+                    selectedGrade = null;
+                    selectedClass = null;
+                    availableClasses = [];
+                    classList = [];
+                  });
+                },
+                decoration: const InputDecoration(
+                  fillColor: Color(0xffF8F8F8),
+                  filled: true,
+                  hintText: '학교를 입력해주세요. 예) 서울고등학교',
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(width: 1, color: Color(0xffF8F8F8)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: Color(0xffF8F8F8)),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 30),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  DropdownButton2<String>(
+                    value: selectedGrade,
+                    hint: const Text(
+                      '학년 선택',
+                      style: TextStyle(fontSize: 18, fontFamily: 'Pretendard'),
+                    ),
+                    underline: const SizedBox(),
+                    isExpanded: true,
+                    onChanged: (value) async {
+                      setState(() {
+                        selectedGrade = value;
+                        selectedClass = null;
+                        classList = [];
+                      });
+
+                      if (value != null) {
+                        final fetchedClasses = await fetchClasses();
+                        setState(() {
+                          classList = availableClasses;
+                        });
+                      }
+                    },
+                    items:
+                        gradeList.map((item) {
+                          return DropdownMenuItem<String>(
+                            value: item,
+                            child: Center(
+                              child: Text(
+                                item,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontFamily: 'Pretendard',
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                    buttonStyleData: ButtonStyleData(
+                      height: 60,
+                      width: 150,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: const Color(0xffF8F8F8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                    dropdownStyleData: DropdownStyleData(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.white,
+                      ),
+                      elevation: 2,
+                    ),
+                    iconStyleData: const IconStyleData(
+                      icon: Icon(Icons.arrow_drop_down),
+                    ),
+                  ),
+                  const SizedBox(width: 30),
+                  DropdownButton2<String>(
+                    value: selectedClass,
+                    hint: const Text(
+                      '반 선택',
+                      style: TextStyle(fontSize: 18, fontFamily: 'Pretendard'),
+                    ),
+                    underline: const SizedBox(),
+                    isExpanded: true,
+                    onChanged: (value) {
+                      setState(() {
+                        selectedClass = value;
+                      });
+                    },
+                    items:
+                        classList.map((item) {
+                          return DropdownMenuItem<String>(
+                            value: item,
+                            child: Center(
+                              child: Text(
+                                item,
+                                style: const TextStyle(
+                                  fontSize: 18,
+                                  fontFamily: 'Pretendard',
+                                ),
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                    buttonStyleData: ButtonStyleData(
+                      height: 60,
+                      width: 150,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: const Color(0xffF8F8F8),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                    ),
+                    dropdownStyleData: DropdownStyleData(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.white,
+                      ),
+                      elevation: 2,
+                    ),
+                    iconStyleData: const IconStyleData(
+                      icon: Icon(Icons.arrow_drop_down),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 340),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(336, 60),
+                  backgroundColor: const Color(0xffFFAD0A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                ),
+                onPressed: () {
+                  if (isFormValid) {
+                    submitSchoolInfo();
+                  } else {
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(SnackBar(content: Text('모든 항목을 선택해주세요.')));
+                  }
+                },
+                child: const Text(
+                  '시작하기',
+                  style: TextStyle(
+                    fontFamily: 'Pretendard',
+                    fontSize: 20,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

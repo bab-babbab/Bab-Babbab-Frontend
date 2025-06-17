@@ -3,11 +3,9 @@ import 'package:bab_babbab_front/screens/information/InfoStuPage.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-import 'package:http_parser/http_parser.dart';
 import 'package:provider/provider.dart';
 import 'package:bab_babbab_front/models/user_model.dart';
+import 'package:bab_babbab_front/service/api_service.dart';
 
 class InformationPage extends StatefulWidget {
   final String id;
@@ -29,83 +27,118 @@ class _InformationPageState extends State<InformationPage> {
     final _imageSize = MediaQuery.of(context).size.width / 4;
     return Scaffold(
       backgroundColor: const Color(0xffFFFFFF),
-      body: Padding(
-        padding: const EdgeInsets.all(30.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const SizedBox(height: 100),
-            const Text(
-              "반가워요! \n정보를 작성해주세요.",
-              style: TextStyle(
-                fontFamily: 'Pretendard',
-                fontWeight: FontWeight.bold,
-                fontSize: 24,
-              ),
-            ),
-            SizedBox(height: 30),
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(
-                hintText: '이름을 입력해주세요.',
-                fillColor: Color(0xffF8F8F8),
-                filled: true,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  borderSide: BorderSide(width: 1, color: Color(0xffF8F8F8)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  borderSide: BorderSide(color: Color(0xffF8F8F8)),
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(30.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const SizedBox(height: 100),
+              const Text(
+                "반가워요! \n정보를 작성해주세요.",
+                style: TextStyle(
+                  fontFamily: 'Pretendard',
+                  fontWeight: FontWeight.bold,
+                  fontSize: 24,
                 ),
               ),
-            ),
-            SizedBox(height: 30),
-            TextField(
-              controller: messageController,
-              decoration: InputDecoration(
-                hintText: '상태메세지를 입력해주세요.',
-                fillColor: Color(0xffF8F8F8),
-                filled: true,
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10)),
-                  borderSide: BorderSide(width: 1, color: Color(0xffF8F8F8)),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(10.0)),
-                  borderSide: BorderSide(color: Color(0xffF8F8F8)),
+              SizedBox(height: 30),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  hintText: '이름을 입력해주세요.',
+                  fillColor: Color(0xffF8F8F8),
+                  filled: true,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(width: 1, color: Color(0xffF8F8F8)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: Color(0xffF8F8F8)),
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 30),
-            Column(
-              children: [
-                if (_pickedFile == null)
-                  Container(
-                    constraints: BoxConstraints(
-                      minHeight: _imageSize,
-                      minWidth: _imageSize,
-                    ),
-                    child: GestureDetector(
-                      onTap: () {
-                        _showBottomSheet();
-                      },
+              SizedBox(height: 30),
+              TextField(
+                controller: messageController,
+                decoration: InputDecoration(
+                  hintText: '상태메세지를 입력해주세요.',
+                  fillColor: Color(0xffF8F8F8),
+                  filled: true,
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10)),
+                    borderSide: BorderSide(width: 1, color: Color(0xffF8F8F8)),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(10.0)),
+                    borderSide: BorderSide(color: Color(0xffF8F8F8)),
+                  ),
+                ),
+              ),
+              SizedBox(height: 30),
+              Column(
+                children: [
+                  if (_pickedFile == null)
+                    Container(
+                      constraints: BoxConstraints(
+                        minHeight: _imageSize,
+                        minWidth: _imageSize,
+                      ),
+                      child: GestureDetector(
+                        onTap: () {
+                          _showBottomSheet();
+                        },
+                        child: Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Container(
+                              width: 100,
+                              height: 100,
+                              decoration: const BoxDecoration(
+                                color: Color(0xFFFFF3E0),
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const Icon(
+                              Icons.image,
+                              size: 30,
+                              color: Color(0xFFFFB300),
+                            ),
+                            Positioned(
+                              bottom: 3,
+                              right: 3,
+                              child: Container(
+                                width: 30,
+                                height: 30,
+                                decoration: const BoxDecoration(
+                                  color: Color(0xFFFFB300),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(
+                                  Icons.add,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    )
+                  else
+                    Container(
+                      width: _imageSize,
+                      height: _imageSize,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: FileImage(File(_pickedFile!.path)),
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                       child: Stack(
                         alignment: Alignment.center,
                         children: [
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFFFF3E0),
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                          const Icon(
-                            Icons.image,
-                            size: 30,
-                            color: Color(0xFFFFB300),
-                          ),
                           Positioned(
                             bottom: 3,
                             right: 3,
@@ -122,61 +155,31 @@ class _InformationPageState extends State<InformationPage> {
                         ],
                       ),
                     ),
-                  )
-                else
-                  Container(
-                    width: _imageSize,
-                    height: _imageSize,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: FileImage(File(_pickedFile!.path)),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                    child: Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Positioned(
-                          bottom: 3,
-                          right: 3,
-                          child: Container(
-                            width: 30,
-                            height: 30,
-                            decoration: const BoxDecoration(
-                              color: Color(0xFFFFB300),
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.add, color: Colors.white),
-                          ),
-                        ),
-                      ],
-                    ),
+                ],
+              ),
+              SizedBox(height: 210),
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  minimumSize: const Size(336, 60),
+                  backgroundColor: Color(0xffFFAD0A),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
                   ),
-              ],
-            ),
-            SizedBox(height: 210),
-            ElevatedButton(
-              style: ElevatedButton.styleFrom(
-                minimumSize: const Size(336, 60),
-                backgroundColor: Color(0xffFFAD0A),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
                 ),
-              ),
-              child: Text(
-                '넘어가기',
-                style: TextStyle(
-                  fontFamily: 'Pretendard',
-                  fontSize: 20,
-                  color: Color(0xffFFFFFF),
+                child: Text(
+                  '넘어가기',
+                  style: TextStyle(
+                    fontFamily: 'Pretendard',
+                    fontSize: 20,
+                    color: Color(0xffFFFFFF),
+                  ),
                 ),
+                onPressed: () {
+                  _submitUserInfo();
+                },
               ),
-              onPressed: () {
-                _submitUserInfo();
-              },
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -242,24 +245,14 @@ class _InformationPageState extends State<InformationPage> {
     final String name = nameController.text;
     final String message = messageController.text;
 
-    final uri = Uri.parse('http://localhost:3000/user/user-info');
-    var request =
-        http.MultipartRequest('POST', uri)
-          ..fields['id'] = widget.id
-          ..fields['name'] = name
-          ..fields['message'] = message;
-
-    if (_pickedFile != null) {
-      var file = await http.MultipartFile.fromPath(
-        'profile', // 서버에서 이 파일을 받을 때 사용할 필드 이름
-        _pickedFile!.path,
-        contentType: MediaType('image', 'jpeg'),
-      );
-      request.files.add(file);
-    }
-
     try {
-      final response = await request.send();
+      final response = await ApiService.submitUserInfo(
+        id: widget.id,
+        name: name,
+        message: message,
+        imageFile: _pickedFile != null ? File(_pickedFile!.path) : null,
+      );
+
       if (response.statusCode == 200 || response.statusCode == 201) {
         Provider.of<UserModel>(
           context,
@@ -274,12 +267,12 @@ class _InformationPageState extends State<InformationPage> {
         );
       } else {
         if (kDebugMode) {
-          print('Failed to submit user info: ${response.statusCode}');
+          print('유저 등록 실패: ${response.statusCode}');
         }
       }
     } catch (e) {
       if (kDebugMode) {
-        print('Error occurred: $e');
+        print('에러 : $e');
       }
     }
   }

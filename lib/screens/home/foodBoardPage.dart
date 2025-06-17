@@ -36,7 +36,8 @@ class _FoodBoardPageState extends State<FoodBoardPage> {
   }
 
   Future<Map<String, dynamic>> loadMeal() async {
-    final school = await MealService.getSchoolInfo('미림마이스터고등학교');
+    final user = Provider.of<UserModel>(context, listen: false);
+    final school = await MealService.getSchoolInfo(user.school);
 
     if (school == null ||
         school['eduOfficeCode'] == null ||
@@ -62,13 +63,6 @@ class _FoodBoardPageState extends State<FoodBoardPage> {
     double containerWidth = screenWidth - 50;
 
     return Scaffold(
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: const Icon(Icons.add, color: Colors.white),
-        elevation: 0,
-        backgroundColor: Color(0xffFFAD0A),
-        shape: CircleBorder(),
-      ),
       backgroundColor: const Color(0xffF7F8F9),
       appBar: AppBar(
         leading: IconButton(
@@ -115,7 +109,7 @@ class _FoodBoardPageState extends State<FoodBoardPage> {
                     ),
                     child: Center(
                       child: Text(
-                        '${user.message}',
+                        user.message,
                         style: TextStyle(
                           fontFamily: 'Pretendard',
                           fontSize: 18,
