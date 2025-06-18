@@ -878,6 +878,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                       left: 16,
                       right: 16,
                       top: 8,
+                      bottom: 8,
                       // bottom:
                       //     MediaQuery.of(
                       //       context,
