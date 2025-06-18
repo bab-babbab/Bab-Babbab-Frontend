@@ -22,7 +22,7 @@ class EnvironmentService {
       List<Map<String, String>> articles = [];
       for (var item in data['items']) {
         articles.add({
-          'title': _removeHtmlTags(item['title']),
+          'title': _cleanTitle(item['title']),
           'link': item['link'],
         });
       }
@@ -32,7 +32,28 @@ class EnvironmentService {
     }
   }
 
-  static String _removeHtmlTags(String htmlString) {
-    return htmlString.replaceAll(RegExp(r'<[^>]*>'), '');
+  static String _cleanTitle(String htmlString) {
+    String cleaned = htmlString.replaceAll(RegExp(r'<[^>]*>'), '');
+    
+    cleaned = _decodeHtmlEntities(cleaned);
+    
+    return cleaned;
+  }
+
+  static String _decodeHtmlEntities(String text) {
+    return text
+        .replaceAll('&quot;', '"')
+        .replaceAll('&#39;', "'")
+        .replaceAll('&apos;', "'")
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&amp;', '&') 
+        .replaceAll('&#8220;', '"') 
+        .replaceAll('&#8221;', '"')
+        .replaceAll('&#8216;', "'") 
+        .replaceAll('&#8217;', "'") 
+        .replaceAll('&hellip;', '…') 
+        .replaceAll('&ndash;', '–')  
+        .replaceAll('&mdash;', '—');  
   }
 }

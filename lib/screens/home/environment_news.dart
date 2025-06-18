@@ -46,70 +46,52 @@ class _EnvironmentNewsState extends State<EnvironmentNews> {
               children: [
                 Image.asset('assets/icon/earth.png', width: 53, height: 53),
                 const SizedBox(width: 30),
-                Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      article['title']!.substring(
-                        0,
-                        article['title']!.length > 20
-                            ? 20
-                            : article['title']!.length,
+                Expanded(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        article['title']!,
+                        style: const TextStyle(
+                          fontFamily: 'Pretendard',
+                          color: Color(0xff898A8D),
+                          fontSize: 15,
+                          fontWeight: FontWeight.w500,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                        textAlign: TextAlign.left,
                       ),
-                      style: const TextStyle(
-                        fontFamily: 'Pretendard',
-                        color: Color(0xff898A8D),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      textAlign: TextAlign.left,
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      article['title']!.length > 20
-                          ? article['title']!.substring(20)
-                          : "",
-                      style: const TextStyle(
-                        fontFamily: 'Pretendard',
-                        color: Color(0xff898A8D),
-                        fontSize: 15,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                      maxLines: 1,
-                      textAlign: TextAlign.left,
-                    ),
-                    const SizedBox(height: 8),
-                    TextButton(
-                      onPressed: () => _launchURL(article['link']!),
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: Size(0, 0),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text(
-                            '보러가기',
-                            style: TextStyle(
-                              color: Color(0xff898A8D),
-                              fontSize: 12,
+                      const SizedBox(height: 8),
+                      TextButton(
+                        onPressed: () => _launchURL(article['link']!),
+                        style: TextButton.styleFrom(
+                          padding: EdgeInsets.zero,
+                          minimumSize: const Size(0, 0),
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        child: const Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              '보러가기',
+                              style: TextStyle(
+                                color: Color(0xff898A8D),
+                                fontSize: 12,
+                              ),
                             ),
-                          ),
-                          SizedBox(width: 4),
-                          Icon(
-                            Icons.chevron_right,
-                            color: Color(0xff898A8D),
-                            size: 16,
-                          ),
-                        ],
+                            SizedBox(width: 4),
+                            Icon(
+                              Icons.chevron_right,
+                              color: Color(0xff898A8D),
+                              size: 16,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),
