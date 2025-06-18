@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:bab_babbab_front/service/firebase_auth.dart';
 import 'package:bab_babbab_front/screens/information/InfoPage.dart';
 
@@ -16,7 +15,7 @@ class SelectPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SvgPicture.asset('assets/logo/logo.svg'),
+            Image.asset('assets/icon/babbabbab.png', height: 190),
             const SizedBox(height: 172),
             ElevatedButton.icon(
               onPressed: () async {
@@ -26,10 +25,7 @@ class SelectPage extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder:
-                          (context) => InformationPage(
-                            id: id,
-                          ),
+                      builder: (context) => InformationPage(id: id),
                     ),
                   );
                 }
@@ -46,7 +42,6 @@ class SelectPage extends StatelessWidget {
               ),
               style: ElevatedButton.styleFrom(
                 backgroundColor: Colors.white,
-                foregroundColor: Colors.black87,
                 alignment: Alignment.center,
                 minimumSize: const Size(305, 50),
                 padding: const EdgeInsets.symmetric(
@@ -56,7 +51,6 @@ class SelectPage extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(8),
                 ),
-                elevation: 4,
               ),
             ),
           ],

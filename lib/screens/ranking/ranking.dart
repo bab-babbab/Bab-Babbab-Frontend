@@ -193,7 +193,11 @@ class _RankingMainContent extends StatelessWidget {
             padding: const EdgeInsets.only(top: 40, bottom: 16),
             child: Text(
               '이번 주 랭킹',
-              style: TextStyle(fontFamily: 'Pretendard', fontSize: 20),
+              style: TextStyle(
+                fontFamily: 'Pretendard',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           Expanded(child: _buildRankingContent()),

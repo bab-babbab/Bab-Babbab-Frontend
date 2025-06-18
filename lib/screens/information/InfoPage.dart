@@ -47,6 +47,10 @@ class _InformationPageState extends State<InformationPage> {
                 controller: nameController,
                 decoration: InputDecoration(
                   hintText: '이름을 입력해주세요.',
+                  hintStyle: TextStyle(
+                    color: Color(0xffCECECE),
+                    fontWeight: FontWeight.bold,
+                  ),
                   fillColor: Color(0xffF8F8F8),
                   filled: true,
                   focusedBorder: OutlineInputBorder(

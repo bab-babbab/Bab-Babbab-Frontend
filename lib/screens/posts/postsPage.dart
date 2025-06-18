@@ -191,7 +191,11 @@ class _PostsPageState extends State<PostsPage> {
               padding: EdgeInsets.only(bottom: 16),
               child: Text(
                 '나의 현황',
-                style: TextStyle(fontFamily: 'Pretendard', fontSize: 24),
+                style: TextStyle(
+                  fontFamily: 'Pretendard',
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
             Container(

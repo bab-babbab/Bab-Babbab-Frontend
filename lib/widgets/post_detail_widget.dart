@@ -877,9 +877,8 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                     padding: EdgeInsets.only(
                       left: 16,
                       right: 16,
-                      top: 17,
+                      top: 8,
                       bottom:
-                          17 +
                           MediaQuery.of(
                             context,
                           ).viewPadding.bottom, // 🔥 하단 안전 영역 고려
