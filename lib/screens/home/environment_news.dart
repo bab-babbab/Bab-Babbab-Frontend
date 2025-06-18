@@ -44,6 +44,7 @@ class _EnvironmentNewsState extends State<EnvironmentNews> {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
+                const SizedBox(width: 10),
                 Image.asset('assets/icon/earth.png', width: 53, height: 53),
                 const SizedBox(width: 30),
                 Expanded(
@@ -93,6 +94,7 @@ class _EnvironmentNewsState extends State<EnvironmentNews> {
                     ],
                   ),
                 ),
+                const SizedBox(width: 15),
               ],
             ),
           );
