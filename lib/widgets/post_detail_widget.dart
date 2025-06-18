@@ -878,10 +878,10 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                       left: 16,
                       right: 16,
                       top: 8,
-                      bottom:
-                          MediaQuery.of(
-                            context,
-                          ).viewPadding.bottom, // 🔥 하단 안전 영역 고려
+                      // bottom:
+                      //     MediaQuery.of(
+                      //       context,
+                      //     ).viewPadding.bottom, // 🔥 하단 안전 영역 고려
                     ),
                     decoration: BoxDecoration(
                       color: Colors.white,
