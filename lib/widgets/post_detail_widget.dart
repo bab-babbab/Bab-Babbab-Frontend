@@ -224,6 +224,8 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
   // 컨트롤러들
   final TextEditingController _commentController = TextEditingController();
   final PageController _pageController = PageController();
+  final ScrollController _scrollController =
+      ScrollController(); // 🔥 스크롤 컨트롤러 추가
 
   // 상태 변수들
   int _currentImageIndex = 0;
@@ -462,6 +464,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
   void dispose() {
     _commentController.dispose();
     _pageController.dispose();
+    _scrollController.dispose(); // 🔥 스크롤 컨트롤러 해제
     super.dispose();
   }
 
@@ -624,6 +627,7 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
 
     return Scaffold(
       backgroundColor: Colors.white,
+      resizeToAvoidBottomInset: true, // 🔥 키보드 대응을 위해 true로 설정
       appBar: AppBar(
         title: Text(
           "게시물",
@@ -658,265 +662,302 @@ class PostDetailWidgetState extends State<PostDetailWidget> {
                   ],
                 ),
               )
-              : SingleChildScrollView(
-                child: Container(
-                  color: Colors.white,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      SizedBox(height: 16),
-                      Container(
-                        padding: EdgeInsets.all(16),
+              : Column(
+                // 🔥 SingleChildScrollView 대신 Column 사용
+                children: [
+                  // 🔥 스크롤 가능한 콘텐츠 영역
+                  Expanded(
+                    child: SingleChildScrollView(
+                      controller: _scrollController, // 🔥 스크롤 컨트롤러 연결
+                      child: Container(
+                        color: Colors.white,
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            // 🔥 사용자 정보
-                            Row(
-                              children: [
-                                Text(
-                                  '$userName ',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: Color(0xFF333333),
-                                  ),
-                                ),
-                                Text(
-                                  userGrade,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Color(0xFF999999),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            SizedBox(height: 12),
-
-                            // 🔥 게시물 제목
-                            Text(
-                              statusMessage,
-                              style: TextStyle(
-                                fontSize: 20,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(height: 20),
-
-                            // 🔥 이미지 슬라이더 (스와이프 가능)
+                            SizedBox(height: 16),
                             Container(
-                              width: double.infinity,
-                              height: 350,
-                              decoration: BoxDecoration(
-                                color: Color(0xFFC4C4C4),
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                              child: Stack(
+                              padding: EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  PageView.builder(
-                                    controller: _pageController,
-                                    onPageChanged: (index) {
-                                      setState(
-                                        () => _currentImageIndex = index,
-                                      );
-                                    },
-                                    itemCount: imageWidgets.length,
-                                    itemBuilder:
-                                        (context, index) => imageWidgets[index],
+                                  // 🔥 사용자 정보
+                                  Row(
+                                    children: [
+                                      Text(
+                                        '$userName ',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Color(0xFF333333),
+                                        ),
+                                      ),
+                                      Text(
+                                        userGrade,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Color(0xFF999999),
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  // 🔥 이미지 카운터 (여러 이미지가 있을 때만 표시)
-                                  if (imageWidgets.length > 1)
-                                    Positioned(
-                                      bottom: 8,
-                                      right: 8,
-                                      child: Container(
-                                        padding: EdgeInsets.symmetric(
-                                          horizontal: 12,
-                                          vertical: 5,
+                                  SizedBox(height: 12),
+
+                                  // 🔥 게시물 제목
+                                  Text(
+                                    statusMessage,
+                                    style: TextStyle(
+                                      fontSize: 20,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  SizedBox(height: 20),
+
+                                  // 🔥 이미지 슬라이더 (스와이프 가능)
+                                  Container(
+                                    width: double.infinity,
+                                    height: 350,
+                                    decoration: BoxDecoration(
+                                      color: Color(0xFFC4C4C4),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: Stack(
+                                      children: [
+                                        PageView.builder(
+                                          controller: _pageController,
+                                          onPageChanged: (index) {
+                                            setState(
+                                              () => _currentImageIndex = index,
+                                            );
+                                          },
+                                          itemCount: imageWidgets.length,
+                                          itemBuilder:
+                                              (context, index) =>
+                                                  imageWidgets[index],
                                         ),
-                                        decoration: BoxDecoration(
-                                          color: Colors.black.withOpacity(0.5),
-                                          borderRadius: BorderRadius.circular(
-                                            8,
+                                        // 🔥 이미지 카운터 (여러 이미지가 있을 때만 표시)
+                                        if (imageWidgets.length > 1)
+                                          Positioned(
+                                            bottom: 8,
+                                            right: 8,
+                                            child: Container(
+                                              padding: EdgeInsets.symmetric(
+                                                horizontal: 12,
+                                                vertical: 5,
+                                              ),
+                                              decoration: BoxDecoration(
+                                                color: Colors.black.withOpacity(
+                                                  0.5,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(8),
+                                              ),
+                                              child: Text(
+                                                "${_currentImageIndex + 1}/${imageWidgets.length}",
+                                                style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 12,
+                                                  fontWeight: FontWeight.w600,
+                                                ),
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                        child: Text(
-                                          "${_currentImageIndex + 1}/${imageWidgets.length}",
-                                          style: TextStyle(
-                                            color: Colors.white,
-                                            fontSize: 12,
-                                            fontWeight: FontWeight.w600,
-                                          ),
-                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  SizedBox(height: 20),
+
+                                  // 🔥 타임스탬프 (날짜만 표시)
+                                  Text(
+                                    timestamp,
+                                    style: TextStyle(color: Colors.grey),
+                                  ),
+                                  SizedBox(height: 20),
+
+                                  // 🔥 댓글 개수
+                                  Padding(
+                                    padding: EdgeInsets.symmetric(
+                                      horizontal: 4.0,
+                                    ),
+                                    child: Text(
+                                      '댓글 ${_comments.length}개',
+                                      style: TextStyle(
+                                        color: Colors.black,
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w700,
+                                        height: 1.40,
                                       ),
                                     ),
+                                  ),
+                                  SizedBox(height: 14),
+
+                                  // 🔥 댓글 리스트
+                                  ListView.builder(
+                                    shrinkWrap: true,
+                                    physics: NeverScrollableScrollPhysics(),
+                                    itemCount: _comments.length,
+                                    itemBuilder: (context, index) {
+                                      final comment = _comments[index];
+
+                                      return Container(
+                                        margin: EdgeInsets.only(bottom: 20),
+                                        padding: EdgeInsets.all(30),
+                                        decoration: BoxDecoration(
+                                          color: Colors.white,
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                          boxShadow: [
+                                            BoxShadow(
+                                              color: Color(0x14000000),
+                                              blurRadius: 10,
+                                              offset: Offset(1, 1),
+                                              spreadRadius: 0,
+                                            ),
+                                          ],
+                                        ),
+                                        child: Column(
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment
+                                                      .spaceBetween,
+                                              children: [
+                                                Text(
+                                                  comment.userName,
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w600,
+                                                    color: Color(0xFF6F6F6F),
+                                                  ),
+                                                ),
+                                                Text(
+                                                  comment.userClass,
+                                                  style: TextStyle(
+                                                    fontWeight: FontWeight.w500,
+                                                    color: Color(0xFFAAAAAA),
+                                                  ),
+                                                ),
+                                                SizedBox(width: 30),
+                                                Text(
+                                                  comment.timestamp,
+                                                  style: TextStyle(
+                                                    color: Color(0xFFAAAAAA),
+                                                    fontWeight: FontWeight.w400,
+                                                    fontSize: 14,
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                            SizedBox(height: 20),
+                                            Text(
+                                              comment.content,
+                                              style: TextStyle(
+                                                fontSize: 15,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    },
+                                  ),
                                 ],
                               ),
-                            ),
-                            SizedBox(height: 20),
-
-                            // 🔥 타임스탬프 (날짜만 표시)
-                            Text(
-                              timestamp,
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                            SizedBox(height: 20),
-
-                            // 🔥 댓글 개수
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 4.0),
-                              child: Text(
-                                '댓글 ${_comments.length}개',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w700,
-                                  height: 1.40,
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 14),
-
-                            // 🔥 댓글 리스트
-                            ListView.builder(
-                              shrinkWrap: true,
-                              physics: NeverScrollableScrollPhysics(),
-                              itemCount: _comments.length,
-                              itemBuilder: (context, index) {
-                                final comment = _comments[index];
-
-                                return Container(
-                                  margin: EdgeInsets.only(bottom: 20),
-                                  padding: EdgeInsets.all(30),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(10),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Color(0x14000000),
-                                        blurRadius: 10,
-                                        offset: Offset(1, 1),
-                                        spreadRadius: 0,
-                                      ),
-                                    ],
-                                  ),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            comment.userName,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w600,
-                                              color: Color(0xFF6F6F6F),
-                                            ),
-                                          ),
-                                          Text(
-                                            comment.userClass,
-                                            style: TextStyle(
-                                              fontWeight: FontWeight.w500,
-                                              color: Color(0xFFAAAAAA),
-                                            ),
-                                          ),
-                                          SizedBox(width: 30),
-                                          Text(
-                                            comment.timestamp,
-                                            style: TextStyle(
-                                              color: Color(0xFFAAAAAA),
-                                              fontWeight: FontWeight.w400,
-                                              fontSize: 14,
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                      SizedBox(height: 20),
-                                      Text(
-                                        comment.content,
-                                        style: TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              },
                             ),
                           ],
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                ),
-              ),
-      bottomNavigationBar: Container(
-        width: double.infinity,
-        height: 70,
-        padding: EdgeInsets.symmetric(vertical: 17),
-        decoration: ShapeDecoration(
-          color: Colors.white,
-          shape: RoundedRectangleBorder(
-            side: BorderSide(width: 2, color: Color(0xFFF2F2F2)),
-          ),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.account_circle, size: 28, color: Colors.grey),
-            SizedBox(width: 14),
-            SizedBox(
-              width: 200,
-              child: TextField(
-                controller: _commentController,
-                decoration: InputDecoration(
-                  hintText: userModel.id.isEmpty ? "로그인 후 댓글 작성" : "댓글 작성하기",
-                  filled: true,
-                  fillColor: Colors.white,
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(20),
-                    borderSide: BorderSide.none,
-                  ),
-                  contentPadding: EdgeInsets.symmetric(vertical: 5),
-                ),
-                onSubmitted: (value) => _addComment(),
-                enabled: !_isLoading && userModel.id.isNotEmpty,
-              ),
-            ),
-            SizedBox(width: 55),
-            Transform.translate(
-              offset: Offset(0, -5),
-              child: IconButton(
-                icon:
-                    _isLoading
-                        ? SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: Color(0xFFFFAD0A),
-                          ),
-                        )
-                        : Transform.rotate(
-                          angle: -40 * (3.141592 / 180),
-                          child: Icon(
-                            Icons.send,
-                            color:
-                                userModel.id.isEmpty
-                                    ? Colors.grey
-                                    : Color(0xFFFFAD0A),
-                            size: 26,
+
+                  // 🔥 댓글 입력창을 body 하단에 고정 (키보드와 함께 올라감)
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.only(
+                      left: 16,
+                      right: 16,
+                      top: 17,
+                      bottom:
+                          17 +
+                          MediaQuery.of(
+                            context,
+                          ).viewPadding.bottom, // 🔥 하단 안전 영역 고려
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border(
+                        top: BorderSide(width: 2, color: Color(0xFFF2F2F2)),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.account_circle,
+                          size: 28,
+                          color: Colors.grey,
+                        ),
+                        SizedBox(width: 14),
+                        Expanded(
+                          // 🔥 Expanded로 텍스트 필드가 남은 공간을 모두 차지하도록
+                          child: TextField(
+                            controller: _commentController,
+                            decoration: InputDecoration(
+                              hintText:
+                                  userModel.id.isEmpty
+                                      ? "로그인 후 댓글 작성"
+                                      : "댓글 작성하기",
+                              filled: true,
+                              fillColor: Colors.white,
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(20),
+                                borderSide: BorderSide.none,
+                              ),
+                              contentPadding: EdgeInsets.symmetric(
+                                horizontal: 16,
+                                vertical: 12,
+                              ),
+                            ),
+                            onSubmitted: (value) => _addComment(),
+                            enabled: !_isLoading && userModel.id.isNotEmpty,
+                            maxLines: null, // 🔥 여러 줄 입력 가능
+                            textInputAction:
+                                TextInputAction.send, // 🔥 키보드에 전송 버튼 표시
                           ),
                         ),
-                onPressed:
-                    _isLoading || userModel.id.isEmpty ? null : _addComment,
+                        SizedBox(width: 14),
+                        IconButton(
+                          icon:
+                              _isLoading
+                                  ? SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      color: Color(0xFFFFAD0A),
+                                    ),
+                                  )
+                                  : Transform.rotate(
+                                    angle: -40 * (3.141592 / 180),
+                                    child: Icon(
+                                      Icons.send,
+                                      color:
+                                          userModel.id.isEmpty
+                                              ? Colors.grey
+                                              : Color(0xFFFFAD0A),
+                                      size: 26,
+                                    ),
+                                  ),
+                          onPressed:
+                              _isLoading || userModel.id.isEmpty
+                                  ? null
+                                  : _addComment,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

@@ -105,7 +105,11 @@ class _HomeMainContentState extends State<_HomeMainContent> {
         children: [
           Text(
             '${user.name}님\n오늘도 수고 했어요!',
-            style: TextStyle(fontFamily: 'Pretendard', fontSize: 24),
+            style: TextStyle(
+              fontFamily: 'Pretendard',
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           SizedBox(height: 28),
           Row(

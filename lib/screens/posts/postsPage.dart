@@ -56,7 +56,7 @@ class _PostsPageState extends State<PostsPage> {
           b['created_at'],
         ).compareTo(DateTime.parse(a['created_at']));
       });
-      
+
       List<Map<String, dynamic>> postsWithUserInfo = [];
       final recentPostsData = postsData.take(3).toList();
 
@@ -183,12 +183,12 @@ class _PostsPageState extends State<PostsPage> {
     return Scaffold(
       backgroundColor: const Color(0xffF7F8F9),
       body: Padding(
-        padding: const EdgeInsets.only(left: 25, top: 100, right: 25),
+        padding: const EdgeInsets.only(left: 25, top: 90, right: 25),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Padding(
-              padding: EdgeInsets.only(top: 40, bottom: 16),
+              padding: EdgeInsets.only(bottom: 16),
               child: Text(
                 '나의 현황',
                 style: TextStyle(fontFamily: 'Pretendard', fontSize: 24),

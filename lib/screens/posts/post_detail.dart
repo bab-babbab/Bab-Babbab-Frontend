@@ -58,7 +58,7 @@ class _PostsPageState extends State<PostsPage> {
                           (context) => PostDetailWidget(
                             selectedImages: _postImages[index],
                             postData: _getPostData(index),
-                            postId: _getPostId(index), 
+                            postId: _getPostId(index),
                             greyContainerCount: 2,
                           ),
                     ),

@@ -164,7 +164,7 @@ class _InformationStuPage extends State<InformationStuPage> {
                 decoration: const InputDecoration(
                   fillColor: Color(0xffF8F8F8),
                   filled: true,
-                  hintText: '학교를 입력해주세요. 예) 서울고등학교',
+                  hintText: '예) 서울고등학교',
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                     borderSide: BorderSide(width: 1, color: Color(0xffF8F8F8)),
