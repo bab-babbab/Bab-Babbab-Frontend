@@ -331,6 +331,7 @@ class _MyPageState extends State<MyPage> {
                             color: Color(0xffFF7D7D),
                             fontFamily: 'Pretendard',
                             fontSize: 16,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         onTap: () {

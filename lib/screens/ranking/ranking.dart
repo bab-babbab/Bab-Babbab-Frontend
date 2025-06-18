@@ -1,10 +1,13 @@
+import 'package:bab_babbab_front/screens/posts/postsPage.dart';
+import 'package:bab_babbab_front/screens/posts/posts_page.dart';
 import 'package:flutter/material.dart';
 import 'package:bab_babbab_front/service/api_service.dart';
 import 'package:provider/provider.dart';
 import 'package:bab_babbab_front/models/user_model.dart';
 
 class RankingPage extends StatefulWidget {
-  const RankingPage({super.key});
+  final VoidCallback? onGoToPosts; // Posts 탭으로 이동하는 콜백 추가
+  const RankingPage({super.key, this.onGoToPosts});
 
   @override
   State<RankingPage> createState() => _RankingPageState();
@@ -100,6 +103,7 @@ class _RankingPageState extends State<RankingPage> {
           isLoading: isLoading,
           error: error,
           onRetry: () => _loadRanking(user.id),
+          onGoToPosts: widget.onGoToPosts, // 콜백 전달
         ),
       ),
     );
@@ -115,6 +119,7 @@ class _RankingMainContent extends StatelessWidget {
   final bool isLoading;
   final String? error;
   final VoidCallback onRetry;
+  final VoidCallback? onGoToPosts; // 콜백 추가
 
   const _RankingMainContent({
     super.key,
@@ -126,6 +131,7 @@ class _RankingMainContent extends StatelessWidget {
     required this.isLoading,
     this.error,
     required this.onRetry,
+    this.onGoToPosts, // 콜백 추가
   });
 
   Widget _buildColorBoxes() {
@@ -188,16 +194,14 @@ class _RankingMainContent extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _buildUserStatsCard(),
-          Padding(
-            padding: const EdgeInsets.only(top: 40, bottom: 16),
-            child: Text(
-              '이번 주 랭킹',
-              style: TextStyle(
-                fontFamily: 'Pretendard',
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+          _buildUserStatsCard(context),
+          const SizedBox(height: 40), // '이번 주 랭킹' 위 간격
+          Text(
+            '이번 주 랭킹',
+            style: TextStyle(
+              fontFamily: 'Pretendard',
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
           ),
           Expanded(child: _buildRankingContent()),
@@ -206,7 +210,7 @@ class _RankingMainContent extends StatelessWidget {
     );
   }
 
-  Widget _buildUserStatsCard() {
+  Widget _buildUserStatsCard(BuildContext context) {
     if (isLoading) {
       return Container(
         width: double.infinity,
@@ -287,7 +291,7 @@ class _RankingMainContent extends StatelessWidget {
                           Text(
                             '연속 ${currentUserStats?['streak'] ?? 0}일',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 14,
                               fontFamily: 'Pretendard',
                               color: Color(0xff969696),
                             ),
@@ -295,14 +299,14 @@ class _RankingMainContent extends StatelessWidget {
                           Text(
                             ' | ',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 14,
                               color: Color(0xff969696),
                             ),
                           ),
                           Text(
                             '뱃지 ${currentUserStats?['badge'] ?? 0}개',
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 14,
                               fontFamily: 'Pretendard',
                               color: Color(0xff969696),
                             ),
@@ -380,9 +384,17 @@ class _RankingMainContent extends StatelessWidget {
                   ),
                   Container(height: 60, width: 1, color: Color(0xffE8E8E9)),
                   Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [_buildColorBoxes(), SizedBox(height: 8)],
+                    child: GestureDetector(
+                      onTap: () {
+                        // Navigator.push 대신 콜백 사용
+                        if (onGoToPosts != null) {
+                          onGoToPosts!();
+                        }
+                      },
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [_buildColorBoxes(), SizedBox(height: 8)],
+                      ),
                     ),
                   ),
                 ],
@@ -494,7 +506,7 @@ class _RankingMainContent extends StatelessWidget {
                         Text(
                           userInfo?['name'] ?? '사용자',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 16,
                             fontFamily: 'Pretendard',
                             fontWeight: FontWeight.w500,
                           ),
@@ -506,7 +518,7 @@ class _RankingMainContent extends StatelessWidget {
                             Text(
                               '${ranking['streak'] ?? 0}일참여',
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 12,
                                 fontFamily: 'Pretendard',
                                 color: Color(0xff898A8D),
                               ),
@@ -514,14 +526,14 @@ class _RankingMainContent extends StatelessWidget {
                             Text(
                               ' | ',
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 12,
                                 color: Color(0xff898A8D),
                               ),
                             ),
                             Text(
                               '뱃지 ${ranking['badge'] ?? 0}개',
                               style: TextStyle(
-                                fontSize: 10,
+                                fontSize: 12,
                                 fontFamily: 'Pretendard',
                                 color: Color(0xff898A8D),
                               ),

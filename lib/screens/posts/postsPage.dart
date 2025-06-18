@@ -228,7 +228,11 @@ class _PostsPageState extends State<PostsPage> {
               children: [
                 const Text(
                   '게시물',
-                  style: TextStyle(fontFamily: 'Pretendard', fontSize: 20),
+                  style: TextStyle(
+                    fontFamily: 'Pretendard',
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
                 GestureDetector(
                   onTap: () {
@@ -260,7 +264,7 @@ class _PostsPageState extends State<PostsPage> {
                 ),
               ],
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 20),
             Expanded(
               child:
                   _isLoadingPosts
@@ -299,11 +303,12 @@ class _PostsPageState extends State<PostsPage> {
                         ),
                       )
                       : ListView.builder(
+                        padding: EdgeInsets.zero,
                         itemCount: _recentPosts.length,
                         itemBuilder: (context, index) {
                           final post = _recentPosts[index];
                           return Padding(
-                            padding: EdgeInsets.only(bottom: 16),
+                            padding: EdgeInsets.only(bottom: 10),
                             child: PostWidget(
                               userName: _getPostUserName(post),
                               userGrade: _getPostUserGrade(post),

@@ -164,7 +164,11 @@ class _InformationStuPage extends State<InformationStuPage> {
                 decoration: const InputDecoration(
                   fillColor: Color(0xffF8F8F8),
                   filled: true,
-                  hintText: '예) 서울고등학교',
+                  hintText: '학교명을 입력해주세요. 예) 서울고등학교',
+                  hintStyle: TextStyle(
+                    color: Color(0xffCECECE),
+                    fontWeight: FontWeight.bold,
+                  ),
                   focusedBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.all(Radius.circular(10)),
                     borderSide: BorderSide(width: 1, color: Color(0xffF8F8F8)),
@@ -183,7 +187,12 @@ class _InformationStuPage extends State<InformationStuPage> {
                     value: selectedGrade,
                     hint: const Text(
                       '학년 선택',
-                      style: TextStyle(fontSize: 18, fontFamily: 'Pretendard'),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'Pretendard',
+                        color: Color(0xffCECECE),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     underline: const SizedBox(),
                     isExpanded: true,
@@ -241,7 +250,12 @@ class _InformationStuPage extends State<InformationStuPage> {
                     value: selectedClass,
                     hint: const Text(
                       '반 선택',
-                      style: TextStyle(fontSize: 18, fontFamily: 'Pretendard'),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'Pretendard',
+                        color: Color(0xffCECECE),
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     underline: const SizedBox(),
                     isExpanded: true,

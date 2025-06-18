@@ -68,6 +68,10 @@ class _InformationPageState extends State<InformationPage> {
                 controller: messageController,
                 decoration: InputDecoration(
                   hintText: '상태메세지를 입력해주세요.',
+                  hintStyle: TextStyle(
+                    color: Color(0xffCECECE),
+                    fontWeight: FontWeight.bold,
+                  ),
                   fillColor: Color(0xffF8F8F8),
                   filled: true,
                   focusedBorder: OutlineInputBorder(

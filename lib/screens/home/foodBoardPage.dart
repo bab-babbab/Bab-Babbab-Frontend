@@ -97,6 +97,7 @@ class _FoodBoardPageState extends State<FoodBoardPage> {
                     style: const TextStyle(
                       fontFamily: 'Pretendard',
                       fontSize: 24,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   const SizedBox(height: 30),

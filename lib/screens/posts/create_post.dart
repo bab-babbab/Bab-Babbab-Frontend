@@ -400,10 +400,10 @@ class _ImageUploadScreenState extends State<ImageUploadScreen> {
                     maxLength: 20,
                     decoration: const InputDecoration(
                       enabledBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey),
+                        borderSide: BorderSide(color: Color(0xffCCCCCC)),
                       ),
                       focusedBorder: UnderlineInputBorder(
-                        borderSide: BorderSide(color: Colors.grey),
+                        borderSide: BorderSide(color: Color(0xffCCCCCC)),
                       ),
                       hintText: '한마디를 작성해주세요.',
                       hintStyle: TextStyle(

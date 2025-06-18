@@ -18,24 +18,25 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   int _selectedIndex = 0;
 
-  late List<Widget> _pages;
-
-  @override
-  void initState() {
-    super.initState();
-    _pages = [
-      _HomeMainContent(
-        onGoToRanking: () {
-          setState(() {
-            _selectedIndex = 2;
-          });
-        },
-      ),
-      PostsPage(),
-      RankingPage(),
-      MyPage(),
-    ];
-  }
+  // _pages를 getter로 변경하여 매번 새로운 인스턴스 생성
+  List<Widget> get _pages => [
+    _HomeMainContent(
+      onGoToRanking: () {
+        setState(() {
+          _selectedIndex = 2;
+        });
+      },
+    ),
+    PostsPage(),
+    RankingPage(
+      onGoToPosts: () {
+        setState(() {
+          _selectedIndex = 1;
+        });
+      },
+    ),
+    MyPage(),
+  ];
 
   void _onItemTapped(int index) {
     setState(() {
@@ -59,7 +60,7 @@ class _HomePageState extends State<HomePage> {
             MaterialPageRoute(builder: (context) => ImageUploadScreen()),
           );
         },
-        child: const Icon(Icons.add, color: Colors.white),
+        child: const Icon(Icons.add, color: Colors.white, size: 35),
         elevation: 0,
         backgroundColor: Color(0xffFFAD0A),
         shape: CircleBorder(),
@@ -226,9 +227,7 @@ class _HomeMainContentState extends State<_HomeMainContent> {
                     child: InkWell(
                       borderRadius: BorderRadius.circular(16),
                       onTap: () {
-                        if (widget.onGoToRanking != null) {
-                          widget.onGoToRanking();
-                        }
+                        widget.onGoToRanking();
                       },
                       child: Container(
                         width: containerWidth / 2 - 7,
@@ -285,7 +284,11 @@ class _HomeMainContentState extends State<_HomeMainContent> {
           SizedBox(height: 43),
           Text(
             '환경 이슈',
-            style: TextStyle(fontFamily: 'Pretendard', fontSize: 20),
+            style: TextStyle(
+              fontFamily: 'Pretendard',
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           SizedBox(height: 17),
           Container(
